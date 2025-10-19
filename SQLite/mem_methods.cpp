@@ -23,7 +23,6 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "mem_methods.h"
 #include <Nirvana/c_heap_dbg.h>
 

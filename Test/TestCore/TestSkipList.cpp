@@ -23,11 +23,11 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/SkipList.h"
 #include "../Source/Heap.h"
 #include "../Source/Chrono.h"
 #include "../Source/SystemInfo.h"
+#include <gtest/gtest.h>
 #include <random>
 #include <Mock/Thread.h>
 

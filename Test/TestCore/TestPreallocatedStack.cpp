@@ -23,8 +23,8 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/PreallocatedStack.h"
+#include <gtest/gtest.h>
 
 using namespace Nirvana::Core;
 

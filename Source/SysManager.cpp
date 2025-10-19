@@ -54,13 +54,15 @@ CORBA::Object::_ref_type SysManager::prot_domain_ref (ESIOP::ProtDomainId domain
 
 bool SysManager::get_call_context (AsyncCallContext& ctx)
 {
-	ctx.proxy_ = proxy_->lock ();
-	proxy_->unlock ();
-	if (ctx.proxy_) {
-		ctx.implementation_ = static_cast <SysManager*> (
-			static_cast <CORBA::Internal::Bridge <PortableServer::ServantBase>*> (
-				&ctx.proxy_->servant ()));
-		return true;
+	if (CORBA::Core::Services::get_if_constructed (CORBA::Core::Services::SysDomain)) {
+		ctx.proxy_ = proxy_->lock ();
+		proxy_->unlock ();
+		if (ctx.proxy_) {
+			ctx.implementation_ = static_cast <SysManager*> (
+				static_cast <CORBA::Internal::Bridge <PortableServer::ServantBase>*> (
+					&ctx.proxy_->servant ()));
+			return true;
+		}
 	}
 	return false;
 }

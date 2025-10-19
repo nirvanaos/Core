@@ -23,7 +23,6 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "Driver.h"
 
 NIRVANA_EXPORT_OBJECT (_exp_SQLite_driver, SQLite::Static_driver)

@@ -23,8 +23,8 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/FileLockRanges.h"
+#include <gtest/gtest.h>
 
 using Nirvana::Core::FileLockRanges;
 using Nirvana::LockType;

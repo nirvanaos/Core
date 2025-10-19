@@ -95,9 +95,7 @@ void Scheduler::toggle_activity () noexcept
 
 void Scheduler::shutdown (unsigned flags)
 {
-	if (ESIOP::is_system_domain ())
-		SysManager::async_call <SysManager::ReceiveShutdown> (INFINITE_DEADLINE, flags);
-	else
+	if (!ESIOP::is_system_domain () || !SysManager::async_call <SysManager::ReceiveShutdown> (INFINITE_DEADLINE, flags))
 		internal_shutdown (flags);
 }
 

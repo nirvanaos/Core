@@ -23,9 +23,9 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "filesystem.h"
 #include "Global.h"
+#include <Nirvana/NDBC.h>
 #include <Nirvana/File.h>
 #include <Nirvana/System.h>
 #include <Nirvana/POSIX.h>

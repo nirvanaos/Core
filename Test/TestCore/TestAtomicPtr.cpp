@@ -23,12 +23,12 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/AtomicPtr.h"
 #include "../Source/LockablePtr.h"
 #include "../Source/AtomicCounter.h"
 #include "../Source/Chrono.h"
 #include "../Source/SystemInfo.h"
+#include <gtest/gtest.h>
 #include <vector>
 #include <Mock/Thread.h>
 

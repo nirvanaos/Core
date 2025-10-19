@@ -23,7 +23,6 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/Memory.h"
 #include "../Source/FileAccessBuf.h"
 #include "../Source/Shell.h"

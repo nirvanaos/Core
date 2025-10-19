@@ -23,10 +23,10 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include <Port/Memory.h>
 #include "../Source/Chrono.h"
 #include "../Source/SystemInfo.h"
+#include <gtest/gtest.h>
 
 using namespace Nirvana;
 using namespace Nirvana::Core;

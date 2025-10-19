@@ -23,9 +23,9 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/WeakRef.h"
 #include "../Source/Chrono.h"
+#include <gtest/gtest.h>
 
 using namespace Nirvana::Core;
 

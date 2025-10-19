@@ -23,7 +23,7 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
+#include <CORBA/CORBA.h>
 #include <CORBA/Proxy/TypeCodeEnum.h>
 #include <CORBA/Proxy/TypeCodeException.h>
 #include "../Source/ORB/tc_impex.h"

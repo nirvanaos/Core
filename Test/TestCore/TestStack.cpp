@@ -23,11 +23,11 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/Stack.h"
 #include "../Source/Heap.h"
 #include "../Source/Chrono.h"
 #include "../Source/SystemInfo.h"
+#include <gtest/gtest.h>
 #include <unordered_set>
 #include <vector>
 #include <random>

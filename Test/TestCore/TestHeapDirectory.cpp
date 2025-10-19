@@ -23,9 +23,9 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "../Source/HeapDirectory.h"
 #include <Port/Memory.h>
+#include <gtest/gtest.h>
 #include <random>
 #include <atomic>
 #include <vector>

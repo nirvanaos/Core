@@ -23,9 +23,9 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "mutex_methods.h"
 #include <assert.h>
+#include <CORBA/CORBA.h>
 #include <Nirvana/System.h>
 
 // For debugging

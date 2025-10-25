@@ -32,7 +32,7 @@
 #include "POAManagerFactory.h"
 #include "HashOctetSeq.h"
 #include "../MapUnorderedStable.h"
-#include <IDL/CoreDomains.h>
+#include "IDL/CoreDomains.h"
 #include <CORBA/Servant_var.h>
 #include <random>
 

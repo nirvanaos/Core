@@ -30,7 +30,7 @@
 
 #include "PolicyImpl.h"
 #include <CORBA/PortableServer_s.h>
-#include <IDL/ORB/BiDirPolicy_s.h>
+#include "IDL/ORB/BiDirPolicy_s.h"
 
 namespace CORBA {
 namespace Core {

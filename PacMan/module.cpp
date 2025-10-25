@@ -23,43 +23,6 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#ifndef PACMAN_SEMVER_H_
-#define PACMAN_SEMVER_H_
-#pragma once
+#include <Nirvana/nirvana_module.h>
 
-#include <Nirvana/Nirvana.h>
-
-// Semantic-versioned name
-class SemVer
-{
-public:
-	SemVer (IDL::String&& name, int64_t version, IDL::String&& prerelease) noexcept;
-	SemVer (const IDL::String& full_name);
-
-	const IDL::String& name () const noexcept
-	{
-		return name_;
-	}
-
-	int64_t version () const noexcept
-	{
-		return version_;
-	}
-
-	const IDL::String& prerelease () const noexcept
-	{
-		return prerelease_;
-	}
-
-	IDL::String to_string () const;
-
-private:
-	static NIRVANA_NORETURN void invalid_name (const IDL::String& full_name);
-
-private:
-	int64_t version_;
-	IDL::String name_;
-	IDL::String prerelease_;
-};
-
-#endif
+NIRVANA_MODULE ("Nirvana/PacMan")

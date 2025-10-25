@@ -36,7 +36,7 @@
 #include "../Synchronized.h"
 #include "../SyncDomain.h"
 #include "../UserObject.h"
-#include <IDL/ORB/RequestCallback_s.h>
+#include "IDL/ORB/RequestCallback_s.h"
 #include "GarbageCollector.h"
 #include "RefCntProxy.h"
 

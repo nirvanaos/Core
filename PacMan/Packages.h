@@ -5,7 +5,7 @@
 *
 * Author: Igor Popov
 *
-* Copyright (c) 2021 Igor Popov.
+* Copyright (c) 2025 Igor Popov.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -30,7 +30,7 @@
 #include <CORBA/Server.h>
 #include <Nirvana/Domains_s.h>
 #include "Connection.h"
-#include "factory.h"
+#include "PacFactory.h"
 
 class Packages :
 	public CORBA::servant_traits <Nirvana::PM::Packages>::Servant <Packages>
@@ -52,9 +52,14 @@ public:
 		Connection (pool_).get_binding (name, platform, binding);
 	}
 
-	IDL::String get_module_name (Nirvana::ModuleId id) const
+	Nirvana::PM::ModuleInfo get_module_info (Nirvana::ModuleId id) const
 	{
-		return Connection (pool_).get_module_name (id);
+		return Connection (pool_).get_module_info (id);
+	}
+
+	void get_module_bindings (Nirvana::ModuleId id, Nirvana::PM::ModuleBindings& metadata) const
+	{
+		Connection (pool_).get_module_bindings (id, metadata);
 	}
 
 	Nirvana::PM::Packages::Modules get_module_dependencies (Nirvana::ModuleId id) const
@@ -67,9 +72,9 @@ public:
 		return Connection (pool_).get_dependent_modules (id);
 	}
 
-	void get_module_bindings (Nirvana::ModuleId id, Nirvana::PM::ModuleBindings& metadata) const
+	Nirvana::PM::Packages::Modules get_modules (const IDL::String& name_filter) const
 	{
-		Connection (pool_).get_module_bindings (id, metadata);
+		return Connection (pool_).get_modules (name_filter);
 	}
 
 	Nirvana::PM::PacMan::_ref_type manage () const

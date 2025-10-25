@@ -34,13 +34,13 @@
 namespace Nirvana {
 namespace Core {
 
-Module::Module (int32_t id, Port::Module&& bin, unsigned flags) :
+Module::Module (int32_t id, Port::Module&& bin, const ModuleStartup& startup_entry) :
 	Binary (std::move (bin)),
-	entry_point_ (nullptr),
+	startup_entry_ (startup_entry),
+	entry_point_ (ModuleInit::_check (startup_entry.startup)),
 	ref_cnt_ (0),
 	initial_ref_cnt_ (0),
-	id_ (id),
-	flags_ (flags)
+	id_ (id)
 {}
 
 void Module::_remove_ref () noexcept
@@ -51,12 +51,10 @@ void Module::_remove_ref () noexcept
 		release_time_ = Chrono::steady_clock ();
 }
 
-void Module::initialize (ModuleInit::_ptr_type entry_point)
+void Module::initialize ()
 {
-	if (entry_point) {
-		entry_point->initialize ();
-		entry_point_ = entry_point;
-	}
+	if (entry_point_)
+		entry_point_->initialize ();
 }
 
 void Module::terminate () noexcept
@@ -83,24 +81,27 @@ Module* Module::create (int32_t id, AccessDirect::_ptr_type file)
 	// Load module into memory
 	Port::Module bin (file);
 
-	// Detect if module is singleton
-	unsigned module_flags = 0;
+	// Find module entry point
+	const ModuleStartup* startup = nullptr;
 	const Section& metadata = bin.metadata ();
 	for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
 		if (!it.valid ())
 			BindError::throw_invalid_metadata ();
 		if (OLF_MODULE_STARTUP == *it.cur ()) {
-			const ModuleStartup* module_startup = reinterpret_cast <const ModuleStartup*> (it.cur ());
-			module_flags = module_startup->flags;
-			break;
+			if (startup)
+				BindError::throw_message ("Duplicated OLF_MODULE_STARTUP entry");
+			startup = reinterpret_cast <const ModuleStartup*> (it.cur ());
 		}
 	}
 
+	if (!startup)
+		BindError::throw_message ("OLF_MODULE_STARTUP not found");
+
 	Module* ret;
-	if (module_flags & OLF_MODULE_SINGLETON)
-		ret = new Singleton (id, std::move (bin), module_flags);
+	if (startup->flags & OLF_MODULE_SINGLETON)
+		ret = new Singleton (id, std::move (bin), *startup);
 	else
-		ret = new ClassLibrary (id, std::move (bin), module_flags);
+		ret = new ClassLibrary (id, std::move (bin), *startup);
 
 	return ret;
 }

@@ -29,11 +29,11 @@
 namespace Nirvana {
 namespace Core {
 
-void ClassLibrary::initialize (ModuleInit::_ptr_type entry_point)
+void ClassLibrary::initialize ()
 {
 	sync_context_type_ = SyncContext::Type::FREE_MODULE_INIT;
 	try {
-		Module::initialize (entry_point);
+		Module::initialize ();
 	} catch (...) {
 		sync_context_type_ = SyncContext::Type::FREE;
 		throw;

@@ -31,7 +31,7 @@
 #include <CORBA/CORBA.h>
 #include <CORBA/Proxy/OperationIndex.h>
 #include <CORBA/Proxy/InterfaceMetadata.h>
-#include <IDL/ORB/RequestCallback.h>
+#include "IDL/ORB/RequestCallback.h"
 
 namespace CORBA {
 namespace Core {

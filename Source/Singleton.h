@@ -40,8 +40,8 @@ class Singleton :
 	public SyncDomain
 {
 public:
-	Singleton (int32_t id, Port::Module&& bin, unsigned flags) :
-		Module (id, std::move (bin), flags),
+	Singleton (int32_t id, Port::Module&& bin, const ModuleStartup& startup_entry) :
+		Module (id, std::move (bin), startup_entry),
 		SyncDomain (MemContext::create ()),
 		sync_context_type_ (SyncContext::Type::SYNC_DOMAIN_SINGLETON)
 	{}

@@ -33,6 +33,7 @@
 #include "Executable.h"
 #include "ORB/RequestLocalBase.h"
 #include <Nirvana/BindErrorUtl.h>
+#include <Nirvana/OLF_Iterator.h>
 #include <CORBA/Proxy/ProxyBase.h>
 
 namespace Nirvana {
@@ -53,22 +54,36 @@ protected:
 };
 
 inline
-Main::_ptr_type Binder::bind (Executable& mod)
+Main::_ptr_type Binder::bind (Executable& exe)
 {
-	const ModuleStartup* startup = nullptr;
+	// Find module entry point
+	const ProcessStartup* startup_entry = nullptr;
+	const Section& metadata = exe.metadata ();
+	for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
+		if (!it.valid ())
+			BindError::throw_invalid_metadata ();
+		if (OLF_PROCESS_STARTUP == *it.cur ()) {
+			if (startup_entry)
+				BindError::throw_message ("Duplicated OLF_PROCESS_STARTUP entry");
+			startup_entry = reinterpret_cast <const ProcessStartup*> (it.cur ());
+		}
+	}
+
+	if (!startup_entry)
+		BindError::throw_message ("OLF_PROCESS_STARTUP not found");
+
+	Main::_ptr_type startup = Main::_check (startup_entry->startup);
 
 	BindResult ret;
 	Ref <Request> rq = Request::create ();
 	rq->invoke ();
 	SYNC_BEGIN (singleton_->sync_domain_, nullptr);
 	try {
-		startup = singleton_->module_bind (mod._get_ptr (), mod.metadata (), nullptr);
+		singleton_->module_bind (exe._get_ptr (), exe.metadata (), nullptr);
 		try {
-			if (!startup || !startup->startup)
-				BindError::throw_message ("Entry point not found");
-			singleton_->binary_map_.add (mod);
+			singleton_->binary_map_.add (exe);
 		} catch (...) {
-			release_imports (mod._get_ptr (), mod.metadata ());
+			release_imports (exe._get_ptr (), exe.metadata ());
 			throw;
 		}
 		rq->success ();
@@ -77,7 +92,7 @@ Main::_ptr_type Binder::bind (Executable& mod)
 	}
 	SYNC_END ();
 	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
-	return Main::_check (startup->startup);
+	return startup;
 }
 
 inline

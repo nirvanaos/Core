@@ -33,7 +33,7 @@
 #include "StreamOutEncap.h"
 #include <CORBA/IORequest_s.h>
 #include "RqHelper.h"
-#include <IDL/ORB/IIOP.h>
+#include "IDL/ORB/IIOP.h"
 #include "CodeSetConverter.h"
 #include "LocalAddress.h"
 #include "IndirectMap.h"

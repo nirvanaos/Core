@@ -1,11 +1,11 @@
 /*
-* Nirvana package manager.
+* Nirvana SFloat module.
 *
 * This is a part of the Nirvana project.
 *
 * Author: Igor Popov
 *
-* Copyright (c) 2025 Igor Popov.
+* Copyright (c) 2021 Igor Popov.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -23,22 +23,6 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "Manager.h"
+#include <Nirvana/nirvana_module.h>
 
-namespace Nirvana {
-namespace PM {
-
-class Static_man_factory :
-	public CORBA::servant_traits <Nirvana::PM::ManagerFactory>::ServantStatic <Static_man_factory>
-{
-public:
-	static Manager::_ref_type create ()
-	{
-		return CORBA::make_reference <::Manager> ()->_this ();
-	}
-};
-
-}
-}
-
-NIRVANA_EXPORT_OBJECT (_exp_Nirvana_PM_pacman_factory, Nirvana::PM::Static_man_factory)
+NIRVANA_MODULE ("Nirvana/SFloat")

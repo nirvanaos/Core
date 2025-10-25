@@ -29,7 +29,7 @@
 #pragma once
 
 #include "ORB/SysServantStatic.h"
-#include <IDL/CoreDomains_s.h>
+#include "IDL/CoreDomains_s.h"
 #include <Port/ProtDomain.h>
 #include "Binder.h"
 #include "ORB/Services.h"
@@ -71,9 +71,9 @@ public:
 		return Binder::load_and_bind <CORBA::Object> (mod_id, file, name);
 	}
 
-	static uint_fast16_t get_module_bindings (Nirvana::AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings)
+	static void get_module_bindings (Nirvana::AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings)
 	{
-		return Binder::get_module_bindings (binary, bindings);
+		Binder::get_module_bindings (binary, bindings);
 	}
 
 	static IDL::String binary_dir ();

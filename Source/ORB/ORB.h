@@ -30,7 +30,7 @@
 
 #include <CORBA/Server.h>
 #include <CORBA/ORB_s.h>
-#include <IDL/ORB/TC_Factory.h>
+#include "IDL/ORB/TC_Factory.h"
 #include "Services.h"
 #include "PolicyFactory.h"
 #include "unmarshal_object.h"

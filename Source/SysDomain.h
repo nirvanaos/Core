@@ -29,7 +29,7 @@
 #pragma once
 
 #include <CORBA/Server.h>
-#include <IDL/CoreDomains_s.h>
+#include "IDL/CoreDomains_s.h"
 #include <Nirvana/BindErrorUtl.h>
 #include "ORB/SysServant.h"
 #include "ORB/system_services.h"
@@ -40,7 +40,7 @@
 #include "NameService/FileSystem.h"
 #include "open_binary.h"
 #include "Binary.h"
-#include <PacMan/factory.h>
+#include "PacMan/PacFactory.h"
 
 namespace Nirvana {
 namespace Core {
@@ -124,27 +124,25 @@ public:
 		}
 	}
 
-	BinaryInfo get_module_bindings (const IDL::String& path, PM::ModuleBindings& bindings)
+	PlatformId get_module_bindings (const IDL::String& path, PM::ModuleBindings& bindings)
 	{
 		AccessDirect::_ref_type binary = open_binary (path);
 
-		BinaryInfo info;
-		info.platform (Binary::get_platform (binary));
-		if (!Binary::is_supported_platform (info.platform ()))
-			Nirvana::BindError::throw_unsupported_platform (info.platform ());
+		PlatformId platform = Binary::get_platform (binary);
+		if (!Binary::is_supported_platform (platform))
+			Nirvana::BindError::throw_unsupported_platform (platform);
 
 		if (SINGLE_DOMAIN) {
 
-			info.module_flags (ProtDomainCore::_narrow (
-				prot_domain ())->get_module_bindings (binary, bindings));
+			ProtDomainCore::_narrow (prot_domain ())->get_module_bindings (binary, bindings);
 
 		} else {
 
 			ProtDomainCore::_ref_type domain = ProtDomainCore::_narrow (
-				manager_->create_prot_domain (info.platform ()));
+				manager_->create_prot_domain (platform));
 
 			try {
-				info.module_flags (ProtDomainCore::_narrow (domain)->get_module_bindings (binary, bindings));
+				ProtDomainCore::_narrow (domain)->get_module_bindings (binary, bindings);
 			} catch (...) {
 				domain->shutdown (SHUTDOWN_FLAG_FORCE);
 				throw;
@@ -153,7 +151,7 @@ public:
 			domain->shutdown (SHUTDOWN_FLAG_FORCE);
 		}
 
-		return info;
+		return platform;
 	}
 
 	CORBA::Object::_ref_type get_service (const IDL::String& id)

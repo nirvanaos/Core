@@ -41,8 +41,8 @@ class ClassLibrary :
 	public SyncContextFree
 {
 public:
-	ClassLibrary (int32_t id, Port::Module&& bin, unsigned flags) :
-		Module (id, std::move (bin), flags),
+	ClassLibrary (int32_t id, Port::Module&& bin, const ModuleStartup& startup_entry) :
+		Module (id, std::move (bin), startup_entry),
 		sync_context_type_ (Type::FREE)
 	{
 		get_data_sections (data_sections_);
@@ -58,7 +58,7 @@ public:
 	virtual void atexit (AtExitFunc f) override;
 	virtual void execute_atexit () noexcept override;
 
-	virtual void initialize (ModuleInit::_ptr_type entry_point) override;
+	virtual void initialize () override;
 	virtual void terminate () noexcept override;
 
 	virtual MemContext* initterm_mem_context () const noexcept override

@@ -23,9 +23,8 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "Packages.h"
-#include "factory_s.h"
+#include "PacFactory_s.h"
 
 namespace Nirvana {
 namespace PM {

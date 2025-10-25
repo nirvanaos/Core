@@ -5,7 +5,7 @@
 *
 * Author: Igor Popov
 *
-* Copyright (c) 2021 Igor Popov.
+* Copyright (c) 2025 Igor Popov.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -27,9 +27,8 @@
 #define PACMAN_MANAGER_H_
 #pragma once
 
-#include <CORBA/Server.h>
 #include "PacMan.h"
-#include "factory_s.h"
+#include "PacFactory_s.h"
 
 class Manager :
 	public CORBA::servant_traits <Nirvana::PM::Manager>::Servant <Manager>

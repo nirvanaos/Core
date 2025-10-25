@@ -5,7 +5,7 @@
 *
 * Author: Igor Popov
 *
-* Copyright (c) 2021 Igor Popov.
+* Copyright (c) 2025 Igor Popov.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -29,7 +29,8 @@
 
 #include <Nirvana/Nirvana.h>
 #include <Nirvana/NDBC.h>
-#include "SemVer.h"
+#include <Nirvana/Packages.h>
+#include <Nirvana/SemVer.h>
 #include "version.h"
 
 class Connection
@@ -129,11 +130,8 @@ public:
 			stm->setInt (3, version.major);
 			stm->setInt (4, version.minor);
 			rs = stm->executeQuery ();
-		} catch (const NDBC::SQLException& ex) {
-			Nirvana::BindError::Error err;
-			err.info ().s (ex.error ().sqlState ());
-			err.info ()._d (Nirvana::BindError::Type::ERR_MESSAGE);
-			throw err;
+		} catch (NDBC::SQLException& ex) {
+			on_sql_exception (ex);
 		}
 
 		if (rs->next ()) {
@@ -149,38 +147,40 @@ public:
 		}
 	}
 
-	IDL::String get_module_name (Nirvana::ModuleId id)
+	Nirvana::PM::ModuleInfo get_module_info (Nirvana::ModuleId id)
 	{
-		auto stm = get_statement ("SELECT name,version,prerelease FROM module WHERE id=?");
+		auto stm = get_statement ("SELECT name,version,prerelease,flags FROM module WHERE id=?");
 		stm->setInt (1, id);
 		NDBC::ResultSet::_ref_type rs = stm->executeQuery ();
-		IDL::String name;
+		Nirvana::PM::ModuleInfo info;
 		if (rs->next ()) {
-			SemVer svname (rs->getString (1), rs->getBigInt (2), rs->getString (3));
-			name = svname.to_string ();
+			Nirvana::SemVer svname (rs->getString (1), rs->getBigInt (2), rs->getString (3));
+			info.name (svname.to_string ());
+			info.flags (rs->getSmallInt (4));
 		}
-		return name;
-	}
-
-	Nirvana::PM::Packages::Modules get_module_dependencies (Nirvana::ModuleId id)
-	{
-		Nirvana::throw_NO_IMPLEMENT ();
-	}
-
-	Nirvana::PM::Packages::Modules get_dependent_modules (Nirvana::ModuleId id)
-	{
-		Nirvana::throw_NO_IMPLEMENT ();
+		return info;
 	}
 
 	void get_module_bindings (Nirvana::ModuleId id, Nirvana::PM::ModuleBindings& metadata)
 	{
 		auto stm = get_statement (
-			"SELECT name,major,minor,interface,type FROM export WHERE module=? ORDER BY name,major,minor;"
-			"SELECT name,version,interface FROM import WHERE module=? ORDER BY name,version,interface;"
+			"SELECT name,version,prerelease,flags FROM module WHERE id=?1;"
+			"SELECT name,major,minor,interface,type FROM export WHERE module=?1 ORDER BY name,major,minor;"
+			"SELECT name,version,interface FROM import WHERE module=?1 ORDER BY name,version,interface;"
 		);
 		stm->setInt (1, id);
 
 		auto rs = stm->executeQuery ();
+
+		if (rs->next ()) {
+			Nirvana::SemVer name (rs->getString (1), rs->getBigInt (2), rs->getString (3));
+			metadata.mod ().name (name.to_string ());
+			metadata.mod ().flags (rs->getSmallInt (4));
+		} else
+			throw Nirvana::PM::PackageDB::ModuleNotFound ();
+
+		NIRVANA_VERIFY (stm->getMoreResults ());
+		rs = stm->getResultSet ();
 
 		while (rs->next ()) {
 			metadata.exports ().emplace_back (
@@ -197,6 +197,21 @@ public:
 			metadata.imports ().emplace_back (rs->getString (1), major (ver), minor (ver),
 				rs->getString (3));
 		}
+	}
+
+	Nirvana::PM::Packages::Modules get_module_dependencies (Nirvana::ModuleId id)
+	{
+		Nirvana::throw_NO_IMPLEMENT ();
+	}
+
+	Nirvana::PM::Packages::Modules get_dependent_modules (Nirvana::ModuleId id)
+	{
+		Nirvana::throw_NO_IMPLEMENT ();
+	}
+
+	Nirvana::PM::Packages::Modules get_modules (const IDL::String& name_filter)
+	{
+		Nirvana::throw_NO_IMPLEMENT ();
 	}
 
 	PreparedStatement get_statement (const char* sql)

@@ -29,7 +29,7 @@
 #pragma once
 
 #include <CORBA/Server.h>
-#include <IDL/ORB/IOP.h>
+#include "IDL/ORB/IOP.h"
 #include "StreamOutEncap.h"
 
 namespace CORBA {

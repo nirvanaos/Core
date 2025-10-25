@@ -23,7 +23,7 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
+#include "PacMan.h"
 #include "Manager.h"
 
 PacMan::Lock::Lock (PacMan& obj) :

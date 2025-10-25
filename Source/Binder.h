@@ -36,7 +36,7 @@
 #include <CORBA/RepId.h>
 #include <Nirvana/Main.h>
 #include <Nirvana/ModuleInit.h>
-#include <IDL/CoreDomains.h>
+#include "IDL/CoreDomains.h"
 #include "WaitableRef.h"
 #include "Chrono.h"
 #include "MapUnorderedStable.h"
@@ -115,14 +115,13 @@ public:
 			.template downcast <Itf> ();
 	}
 
-	/// Bind executable.
+	/// \brief Bind executable.
 	/// 
-	/// \param mod Module interface.
-	/// \param metadata Module OLF metadata section.
+	/// \param exe Executable object.
 	/// \returns The Main interface pointer.
-	inline static Main::_ptr_type bind (Executable& mod);
+	inline static Main::_ptr_type bind (Executable& exe);
 
-	/// Unbind executable.
+	/// \brief Unbind executable.
 	/// 
 	/// \param mod The Nirvana::Module interface.
 	/// \param metadata Module metadata.
@@ -164,7 +163,7 @@ public:
 		return ret;
 	}
 
-	static uint_fast16_t get_module_bindings (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings);
+	static void get_module_bindings (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings);
 
 	static Binder& singleton () noexcept
 	{
@@ -410,6 +409,7 @@ private:
 		// Module exports.
 		ObjectMap exports;
 
+		// Module dependencies filled out when collect_dependencies is `true`.
 		Dependencies dependencies;
 
 		bool collect_dependencies;
@@ -433,9 +433,7 @@ private:
 	/// \param metadata Module metadata.
 	/// \param mod_context Module binding context.
 	///   If module is Executable, mod_context must be `nullptr`.
-	/// 
-	/// \returns Pointer to the ModuleStartup metadata structure, if found. Otherwise `nullptr`.
-	const ModuleStartup* module_bind (Nirvana::Module::_ptr_type mod, const Section& metadata,
+	void module_bind (Nirvana::Module::_ptr_type mod, const Section& metadata,
 		ModuleContext* mod_context);
 
 	void bind_and_init (Module& mod, ModuleContext& context);
@@ -465,7 +463,7 @@ private:
 	BindResult load_and_bind_sync (int32_t mod_id, AccessDirect::_ptr_type binary,
 		const ObjectKey& name, CORBA::Internal::String_in iid);
 
-	uint_fast16_t get_module_bindings_sync (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings);
+	void get_module_bindings_sync (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings);
 
 	void housekeeping_modules ();
 	void delete_module (Module* mod) noexcept;

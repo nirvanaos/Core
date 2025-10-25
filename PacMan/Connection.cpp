@@ -23,8 +23,8 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
 #include "Connection.h"
+#include <Nirvana/BindErrorUtl.h>
 
 #define DATABASE_PATH "/var/lib/packages.db"
 

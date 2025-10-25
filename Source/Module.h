@@ -76,16 +76,22 @@ public:
 		return ref_cnt_;
 	}
 
+	/// \returns Module name.
+	const char* name () const noexcept
+	{
+		return startup_entry_.name;
+	}
+
 	/// \returns `true` if module is singleton library.
 	bool is_singleton () const noexcept
 	{
-		return flags_ & OLF_MODULE_SINGLETON;
+		return flags () & OLF_MODULE_SINGLETON;
 	}
 
 	/// \returns Module metadata flags.
 	unsigned flags () const noexcept
 	{
-		return flags_;
+		return (unsigned)startup_entry_.flags;
 	}
 
 	/// Called when module is loaded completely
@@ -107,7 +113,7 @@ public:
 		return !bound () && release_time_ <= t;
 	}
 
-	virtual void initialize (ModuleInit::_ptr_type entry_point);
+	virtual void initialize ();
 	virtual void terminate () noexcept;
 
 	virtual void raise_exception (CORBA::SystemException::Code code, unsigned minor) override;
@@ -123,11 +129,12 @@ public:
 	}
 
 protected:
-	Module (int32_t id, Port::Module&& bin, unsigned flags);
+	Module (int32_t id, Port::Module&& bin, const ModuleStartup& startup_entry);
 
 protected:
 	friend class Binder;
 
+	const ModuleStartup& startup_entry_;
 	ModuleInit::_ptr_type entry_point_;
 	SteadyTime release_time_;
 	AtomicCounter <false> ref_cnt_;

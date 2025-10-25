@@ -30,7 +30,7 @@
 
 #include <CORBA/CORBA.h>
 #include "../CoreInterface.h"
-#include <IDL/ORB/GIOP.h>
+#include "IDL/ORB/GIOP.h"
 
 namespace CORBA {
 namespace Core {

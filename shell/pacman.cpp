@@ -5,7 +5,7 @@
 *
 * Author: Igor Popov
 *
-* Copyright (c) 2021 Igor Popov.
+* Copyright (c) 2025 Igor Popov.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -23,85 +23,44 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "pch.h"
+#include <Nirvana/Nirvana.h>
+#include <Nirvana/Shell_s.h>
 #include <Nirvana/Domains.h>
 #include <Nirvana/Packages.h>
+#include <Nirvana/System.h>
+#include <Nirvana/POSIX.h>
 #include <Nirvana/platform.h>
 
 namespace Nirvana {
 
-class Static_regmod :
-	public CORBA::servant_traits <Nirvana::Cmdlet>::ServantStatic <Static_regmod>
+class Static_pacman :
+	public CORBA::servant_traits <Nirvana::Cmdlet>::ServantStatic <Static_pacman>
 {
 public:
 	static int run (StringSeq& argv)
 	{
-		static const char usage [] = "Usage: regmod (<binary path> | -u) <module name>\n";
-		if (argv.size () != 2) {
+		static const char usage [] = "Usage: pacman <command> [parameters]";
+		if (argv.size () < 1) {
 			print (1, usage);
-			return -1;
-		}
-
-		PM::Packages::_ref_type packages = SysDomain::_narrow (
-			CORBA::the_orb->resolve_initial_references ("SysDomain")
-		)->provide_packages ();
-
-		PM::PacMan::_ref_type pacman = packages->manage ();
-		if (!pacman) {
-			print (2, "Installation session is already started, try later.\n");
 			return -1;
 		}
 
 		int ret = -1;
 
 		try {
-			if (argv [0][0] != '-') {
-
-				IDL::String bin_path;
-				{
-					CosNaming::Name name;
-					the_system->append_path (name, argv [0], true);
-					bin_path = the_system->to_string (name);
-				}
-				uint16_t platform = pacman->register_binary (bin_path, argv [1], 0);
-				pacman->commit ();
-				ret = 0;
-
-				print (1, "Binary '");
-				print (1, bin_path);
-				print (1, "' was successfully registered for platform ");
-				const char* platform_name = get_platform_name (platform);
-				if (platform_name)
-					print (1, platform_name);
-				else
-					print (1, platform);
-				print (1, " of module ");
-				print (1, argv [1]);
-				print (1, ".");
-				println (1);
-			} else if (argv [0][1] == 'u') {
-				uint32_t cnt = pacman->unregister (argv [1]);
-				if (cnt) {
-					pacman->commit ();
-					ret = 0;
-
-					print (1, "Module ");
-					print (1, argv [1]);
-					print (1, " was successfully unregistered.");
-					println (1);
-				} else {
-					print (2, "Module ");
-					print (2, argv [1]);
-					print (2, " not found.");
+			auto packages = SysDomain::_narrow (CORBA::the_orb->resolve_initial_references ("SysDomain")
+				)->provide_packages ();
+			try {
+				if (argv [0] == "reg-bin")
+					ret = reg_bin (packages, argv);
+				else {
+					print (2, "Unknown command: ");
+					print (2, argv [0]);
 					println (2);
 				}
-			} else {
-				print (2, "Unknown option: ");
-				print (2, argv [0]);
-				println (2);
+			} catch (const BindError::Error& ex) {
+				print (packages, ex);
 			}
-		} catch (const BindError::Error& ex) {
-			print (pacman, ex);
 		} catch (const CORBA::SystemException& ex) {
 			print (ex);
 			println (2);
@@ -111,6 +70,41 @@ public:
 	}
 
 private:
+	static int reg_bin (PM::Packages::_ptr_type packages, const StringSeq& argv)
+	{
+		PM::PacMan::_ref_type pacman = manage (packages);
+		if (!pacman)
+			return -1;
+
+		IDL::String bin_path;
+		{
+			CosNaming::Name name;
+			the_system->append_path (name, argv [0], true);
+			bin_path = the_system->to_string (name);
+		}
+
+		PM::ModuleInfo info;
+		PlatformId platform = pacman->register_binary (bin_path, info);
+		pacman->commit ();
+
+		print (1, "Binary '");
+		print (1, bin_path);
+		print (1, "' was successfully registered for platform ");
+		const char* platform_name = get_platform_name (platform);
+		if (platform_name)
+			print (1, platform_name);
+		else
+			print (1, platform);
+		print (1, " of module ");
+		print (1, info);
+		print (1, ".");
+		println (1);
+
+		return 0;
+	}
+
+	static PM::PacMan::_ref_type manage (PM::Packages::_ptr_type packages);
+
 	static void print (int fd, const char* s);
 	static void print (int fd, const std::string& s);
 	static void print (int fd, int d);
@@ -118,30 +112,39 @@ private:
 	static void print (PM::PackageDB::_ptr_type packages, const BindError::Error& err);
 	static void print (PM::PackageDB::_ptr_type packages, const BindError::Info& err);
 	static void print (const CORBA::SystemException& se);
+	static void print (int fd, const PM::ModuleInfo& info);
 };
 
-void Static_regmod::print (int fd, const char* s)
+PM::PacMan::_ref_type Static_pacman::manage (PM::Packages::_ptr_type packages)
+{
+	PM::PacMan::_ref_type pm = packages->manage ();
+	if (!pm)
+		print (2, "Installation session is already started, try later.\n");
+	return pm;
+}
+
+void Static_pacman::print (int fd, const char* s)
 {
 	the_posix->write (fd, s, strlen (s));
 }
 
-void Static_regmod::print (int fd, const std::string& s)
+void Static_pacman::print (int fd, const std::string& s)
 {
 	the_posix->write (fd, s.data (), s.size ());
 }
 
-void Static_regmod::println (int fd)
+void Static_pacman::println (int fd)
 {
 	const char n = '\n';
 	the_posix->write (fd, &n, 1);
 }
 
-void Static_regmod::print (int fd, int d)
+void Static_pacman::print (int fd, int d)
 {
 	print (fd, std::to_string (d));
 }
 
-void Static_regmod::print (PM::PackageDB::_ptr_type packages, const BindError::Error& err)
+void Static_pacman::print (PM::PackageDB::_ptr_type packages, const BindError::Error& err)
 {
 	print (packages, err.info ());
 	for (auto it = err.stack ().cbegin (), end = err.stack ().cend (); it != end; ++it) {
@@ -149,7 +152,7 @@ void Static_regmod::print (PM::PackageDB::_ptr_type packages, const BindError::E
 	}
 }
 
-void Static_regmod::print (PM::PackageDB::_ptr_type packages, const BindError::Info& err)
+void Static_pacman::print (PM::PackageDB::_ptr_type packages, const BindError::Info& err)
 {
 	switch (err._d ()) {
 	case BindError::Type::ERR_MESSAGE:
@@ -169,7 +172,7 @@ void Static_regmod::print (PM::PackageDB::_ptr_type packages, const BindError::I
 
 	case BindError::Type::ERR_MOD_LOAD:
 		print (2, "Module load: ");
-		print (2, packages->get_module_name (err.mod_info ().module_id ()));
+		print (2, packages->get_module_info (err.mod_info ().module_id ()));
 		break;
 
 	case BindError::Type::ERR_SYSTEM: {
@@ -191,7 +194,7 @@ void Static_regmod::print (PM::PackageDB::_ptr_type packages, const BindError::I
 	println (2);
 }
 
-void Static_regmod::print (const CORBA::SystemException& se)
+void Static_pacman::print (const CORBA::SystemException& se)
 {
 	print (2, se.what ());
 	int err = get_minor_errno (se.minor ());
@@ -201,6 +204,13 @@ void Static_regmod::print (const CORBA::SystemException& se)
 	}
 }
 
+void Static_pacman::print (int fd, const PM::ModuleInfo& info)
+{
+	print (fd, info.name ());
+	if (info.flags () & PM::MODULE_FLAG_SINGLETON)
+		print (fd, " (singleton)");
 }
 
-NIRVANA_EXPORT_STATIC (_exp_regmod, "Nirvana/regmod", Nirvana::Static_regmod)
+}
+
+NIRVANA_EXPORT_STATIC (_exp_pacman, "Nirvana/pacman", Nirvana::Static_pacman)

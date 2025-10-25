@@ -5,7 +5,7 @@
 *
 * Author: Igor Popov
 *
-* Copyright (c) 2021 Igor Popov.
+* Copyright (c) 2025 Igor Popov.
 *
 * This program is free software; you can redistribute it and/or modify
 * it under the terms of the GNU Lesser General Public License as published by
@@ -27,11 +27,10 @@
 #define PACMAN_PACMAN_H_
 #pragma once
 
-#include <CORBA/Server.h>
-#include <Nirvana/Domains_s.h>
-#include <Nirvana/posix_defs.h>
 #include "Connection.h"
-#include "version.h"
+#include <Nirvana/Packages_s.h>
+#include <Nirvana/Domains.h>
+#include <Nirvana/BindErrorUtl.h>
 
 class Manager;
 
@@ -100,16 +99,17 @@ public:
 		}
 	};
 
-	uint16_t register_binary (const IDL::String& path, const IDL::String& module_name, unsigned flags)
+	Nirvana::PlatformId register_binary (const IDL::String& path, Nirvana::PM::ModuleInfo& info)
 	{
 		Lock lock (*this);
-
-		SemVer svname (module_name);
 
 		Nirvana::SysDomain::_ref_type sys_domain = Nirvana::SysDomain::_narrow (
 			CORBA::the_orb->resolve_initial_references ("SysDomain"));
 		Nirvana::PM::ModuleBindings metadata;
-		Nirvana::BinaryInfo bi = sys_domain->get_module_bindings (path, metadata);
+		Nirvana::PlatformId platform = sys_domain->get_module_bindings (path, metadata);
+		Nirvana::SemVer svname;
+		if (!svname.parse (metadata.mod ().name ()))
+			Nirvana::BindError::throw_message ("Invalid name: " + metadata.mod ().name ());
 
 		try {
 
@@ -125,7 +125,7 @@ public:
 			if (rs->next ()) {
 
 				module_id = rs->getInt (1);
-				if (bi.module_flags () != rs->getSmallInt (2))
+				if (metadata.mod ().flags () != rs->getSmallInt (2))
 					Nirvana::BindError::throw_message ("Module type mismatch");
 
 				std::sort (metadata.imports ().begin (), metadata.imports ().end (), Less ());
@@ -143,7 +143,7 @@ public:
 				stm->setString (1, svname.name ());
 				stm->setBigInt (2, svname.version ());
 				stm->setString (3, svname.prerelease ());
-				stm->setInt (4, bi.module_flags ());
+				stm->setInt (4, metadata.mod ().flags ());
 				rs = stm->executeQuery ();
 				rs->next ();
 				module_id = rs->getInt (1);
@@ -173,7 +173,7 @@ public:
 
 			stm = get_statement ("INSERT OR REPLACE INTO binary VALUES(?,?,?)");
 			stm->setInt (1, module_id);
-			stm->setInt (2, bi.platform ());
+			stm->setInt (2, platform);
 			stm->setString (3, path);
 			stm->executeUpdate ();
 
@@ -181,21 +181,18 @@ public:
 			on_sql_exception (ex);
 		}
 
-		return bi.platform ();
+		info = std::move (metadata.mod ());
+		return platform;
 	}
 
-	uint32_t unregister (const IDL::String& module_name)
+	uint32_t unregister (Nirvana::ModuleId id, bool recursive)
 	{
 		Lock lock (*this);
 
-		SemVer svname (module_name);
-
 		try {
 
-			auto stm = get_statement ("DELETE FROM module WHERE name=? AND version=? AND prerelease=?");
-			stm->setString (1, svname.name ());
-			stm->setBigInt (2, svname.version ());
-			stm->setString (3, svname.prerelease ());
+			auto stm = get_statement ("DELETE FROM module WHERE id=?");
+			stm->setInt (1, id);
 
 			return stm->executeUpdate ();
 		} catch (NDBC::SQLException& ex) {

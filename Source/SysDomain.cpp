@@ -99,7 +99,7 @@ bool SysDomain::get_sys_binding (CORBA::Internal::String_in name, unsigned platf
 	static const SysObject sys_objects [] = {
 		{ "NDBC/the_manager", MODULE_DBC},
 		{ "Nirvana/dec_calc", MODULE_DECCALC },
-		{ "Nirvana/regmod", MODULE_SHELL },
+		{ "Nirvana/pacman", MODULE_SHELL },
 		{ "SQLite/driver", MODULE_SQLITE }
 	};
 

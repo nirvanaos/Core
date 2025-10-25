@@ -27,7 +27,6 @@
 #include <CORBA/Server.h>
 #include <CORBA/Proxy/ProxyBase.h>
 #include <Nirvana/Domains.h>
-#include <Nirvana/OLF_Iterator.h>
 #include "ORB/ServantBase.h"
 #include "ORB/LocalObject.h"
 #include "ORB/RequestLocalBase.h"
@@ -171,8 +170,8 @@ void Binder::terminate () noexcept
 	BinderMemory::terminate ();
 }
 
-const ModuleStartup* Binder::module_bind (::Nirvana::Module::_ptr_type mod,
-	const Section& metadata, ModuleContext* mod_context)
+void Binder::module_bind (::Nirvana::Module::_ptr_type mod, const Section& metadata,
+	ModuleContext* mod_context)
 {
 	ExecDomain& ed = ExecDomain::current ();
 	void* prev_context = ed.TLS_get (CoreTLS::CORE_TLS_BINDER);
@@ -186,7 +185,6 @@ const ModuleStartup* Binder::module_bind (::Nirvana::Module::_ptr_type mod,
 	};
 
 	ImportInterface* module_entry = nullptr;
-	const ModuleStartup* module_startup = nullptr;
 
 	try {
 
@@ -236,15 +234,6 @@ const ModuleStartup* Binder::module_bind (::Nirvana::Module::_ptr_type mod,
 				case OLF_IMPORT_OBJECT:
 					flags |= MetadataFlags::IMPORT_OBJECTS;
 					break;
-
-				case OLF_MODULE_STARTUP:
-					if (module_startup)
-						BindError::throw_message ("Duplicated OLF_MODULE_STARTUP entry");
-					module_startup = reinterpret_cast <const ModuleStartup*> (it.cur ());
-					break;
-
-				default:
-					BindError::throw_invalid_metadata ();
 			}
 		}
 
@@ -331,8 +320,6 @@ const ModuleStartup* Binder::module_bind (::Nirvana::Module::_ptr_type mod,
 	}
 
 	ed.TLS_set (CoreTLS::CORE_TLS_BINDER, prev_context);
-
-	return module_startup;
 }
 
 void Binder::module_unbind (Nirvana::Module::_ptr_type mod, const Section& metadata) noexcept
@@ -431,7 +418,7 @@ Ref <Module> Binder::load (int32_t mod_id, AccessDirect::_ptr_type binary)
 
 void Binder::bind_and_init (Module& mod, ModuleContext& context)
 {
-	const ModuleStartup* startup = module_bind (mod._get_ptr (), mod.metadata (), &context);
+	module_bind (mod._get_ptr (), mod.metadata (), &context);
 
 	binary_map_.add (mod);
 
@@ -441,13 +428,7 @@ void Binder::bind_and_init (Module& mod, ModuleContext& context)
 	SYNC_BEGIN (context.sync_context, mod.initterm_mem_context ());
 	try {
 		try {
-			// Module without an entry point is a special case reserved for future.
-			// Currently we prohibit it.
-			if (!startup)
-				BindError::throw_message ("Entry point not found");
-
-			mod.initialize (startup ? ModuleInit::_check (startup->startup) : nullptr);
-
+			mod.initialize ();
 		} catch (const SystemException& ex) {
 			module_unbind (mod._get_ptr (), mod.metadata ());
 			BindError::Error err;
@@ -710,7 +691,7 @@ Binder::BindResult Binder::load_and_bind (int32_t mod_id,
 	return ret;
 }
 
-uint_fast16_t Binder::get_module_bindings_sync (Nirvana::AccessDirect::_ptr_type binary,
+void Binder::get_module_bindings_sync (Nirvana::AccessDirect::_ptr_type binary,
 	PM::ModuleBindings& bindings)
 {
 	Module* mod = nullptr;
@@ -727,6 +708,9 @@ uint_fast16_t Binder::get_module_bindings_sync (Nirvana::AccessDirect::_ptr_type
 	}
 
 	try {
+
+		bindings.mod ().name (mod->name ());
+		bindings.mod ().flags ((uint16_t)mod->flags ());
 
 		for (const auto& el : context.exports) {
 			InterfacePtr itf = el.second.itf;
@@ -776,24 +760,19 @@ uint_fast16_t Binder::get_module_bindings_sync (Nirvana::AccessDirect::_ptr_type
 		throw;
 	}
 
-	uint_fast16_t ret = (uint_fast16_t)mod->flags ();
-
 	terminate_and_unbind (*mod);
 	delete_module (mod);
-
-	return ret;
 }
 
-uint_fast16_t Binder::get_module_bindings (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings)
+void Binder::get_module_bindings (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings)
 {
-	uint_fast16_t ret;
 	Ref <Request> rq = Request::create ();
 	rq->invoke ();
 	SYNC_BEGIN (sync_domain (), nullptr);
 	try {
 		rq->unmarshal_end ();
 		PM::ModuleBindings bindings;
-		ret = singleton_->get_module_bindings_sync (binary, bindings);
+		singleton_->get_module_bindings_sync (binary, bindings);
 		Type <PM::ModuleBindings>::marshal_out (bindings, rq->_get_ptr ());
 		rq->success ();
 	} catch (CORBA::UserException& e) {
@@ -803,7 +782,6 @@ uint_fast16_t Binder::get_module_bindings (AccessDirect::_ptr_type binary, PM::M
 	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
 	Type <PM::ModuleBindings>::unmarshal (rq->_get_ptr (), bindings);
 	rq->unmarshal_end ();
-	return ret;
 }
 
 inline

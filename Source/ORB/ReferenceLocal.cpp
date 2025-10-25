@@ -28,7 +28,7 @@
 #include "POA_Root.h"
 #include "LocalAddress.h"
 #include "StreamOutEncap.h"
-#include <IDL/ORB/IIOP.h>
+#include "IDL/ORB/IIOP.h"
 #include "ESIOP.h"
 #include <CORBA/Servant_var.h>
 #include "system_services.h"

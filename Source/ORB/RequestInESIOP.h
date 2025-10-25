@@ -31,7 +31,7 @@
 #include "RequestIn.h"
 #include "ESIOP.h"
 #include "system_services.h"
-#include <IDL/ORB/CSI.h>
+#include "IDL/ORB/CSI.h"
 
 namespace CORBA {
 namespace Core {

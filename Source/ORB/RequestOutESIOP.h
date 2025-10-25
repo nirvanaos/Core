@@ -31,7 +31,7 @@
 #include "RequestOut.h"
 #include "StreamOutSM.h"
 #include "OutgoingRequests.h"
-#include <IDL/ORB/CSI.h>
+#include "IDL/ORB/CSI.h"
 
 namespace CORBA {
 namespace Core {

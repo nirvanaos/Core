@@ -36,6 +36,8 @@
 #include <CORBA/RepId.h>
 #include <Nirvana/Main.h>
 #include <Nirvana/ModuleInit.h>
+#include <Nirvana/BindErrorUtl.h>
+#include <Nirvana/OLF_Iterator.h>
 #include "IDL/CoreDomains.h"
 #include "WaitableRef.h"
 #include "Chrono.h"
@@ -45,15 +47,15 @@
 #include "TimerAsyncCall.h"
 #include "SystemInfo.h"
 #include "BinaryMap.h"
+#include "Executable.h"
+#include "call_with_user_exceptions.h"
 
 namespace Nirvana {
 namespace Core {
 
-class ClassLibrary;
-class Singleton;
-class Executable;
-
-/// Implements object binding and module loading.
+/// @brief This large complex object is cantral part of the Nirvana Core.
+/// It binds core objects with each other, loads modules, keeps remote references etc.
+/// Binder has own heap and synchronization domain.
 class Binder
 {
 	/// To avoid priority inversion, if module loader deadline is too far,
@@ -119,13 +121,50 @@ public:
 	/// 
 	/// \param exe Executable object.
 	/// \returns The Main interface pointer.
-	inline static Main::_ptr_type bind (Executable& exe);
+	inline static Main::_ptr_type bind (Executable& exe)
+	{
+		// Find module entry point
+		const ProcessStartup* startup_entry = nullptr;
+		const Section& metadata = exe.metadata ();
+		for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
+			if (!it.valid ())
+				BindError::throw_invalid_metadata ();
+			if (OLF_PROCESS_STARTUP == *it.cur ()) {
+				if (startup_entry)
+					BindError::throw_message ("Duplicated OLF_PROCESS_STARTUP entry");
+				startup_entry = reinterpret_cast <const ProcessStartup*> (it.cur ());
+			}
+		}
+
+		if (!startup_entry)
+			BindError::throw_message ("OLF_PROCESS_STARTUP not found");
+
+		Main::_ptr_type startup = Main::_check (startup_entry->startup);
+
+		call_with_user_exceptions (singleton_->sync_domain_, nullptr, [&exe]() {
+			singleton_->module_bind (exe._get_ptr (), exe.metadata (), nullptr);
+			try {
+				singleton_->binary_map_.add (exe);
+			} catch (...) {
+				release_imports (exe._get_ptr (), exe.metadata ());
+				throw;
+			}
+			});
+
+		return startup;
+	}
 
 	/// \brief Unbind executable.
 	/// 
 	/// \param mod The Nirvana::Module interface.
 	/// \param metadata Module metadata.
-	inline static void unbind (Executable& mod) noexcept;
+	inline static void unbind (Executable& mod) noexcept
+	{
+		SYNC_BEGIN (singleton_->sync_domain_, nullptr);
+		singleton_->binary_map_.remove (mod);
+		SYNC_END ();
+		release_imports (mod._get_ptr (), mod.metadata ());
+	}
 
 	/// Unmarshal remote reference.
 	/// 
@@ -496,8 +535,6 @@ private:
 	private:
 		virtual void run (const TimeBase::TimeT& signal_time);
 	};
-
-	class Request;
 
 private:
 	ObjectMap object_map_;

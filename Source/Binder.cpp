@@ -23,13 +23,11 @@
 * Send comments and/or bug reports to:
 *  popov.nirvana@gmail.com
 */
-#include "Binder.inl"
+#include "Binder.h"
 #include <CORBA/Server.h>
-#include <CORBA/Proxy/ProxyBase.h>
 #include <Nirvana/Domains.h>
 #include "ORB/ServantBase.h"
 #include "ORB/LocalObject.h"
-#include "ORB/RequestLocalBase.h"
 #include "ClassLibrary.h"
 #include "Singleton.h"
 #include "Executable.h"
@@ -260,10 +258,7 @@ void Binder::module_bind (::Nirvana::Module::_ptr_type mod, const Section& metad
 			// Pass 3: Export objects.
 			if (flags & MetadataFlags::EXPORT_OBJECTS) {
 				assert (mod_context); // Executable can not export.
-				Ref <Request> rq = Request::create ();
-				rq->invoke ();
-				SYNC_BEGIN (mod_context->sync_context, nullptr);
-				try {
+				call_with_user_exceptions (mod_context->sync_context, nullptr, [&metadata, mod_context]() {
 					for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
 						switch (*it.cur ()) {
 							case OLF_EXPORT_OBJECT: {
@@ -285,12 +280,7 @@ void Binder::module_bind (::Nirvana::Module::_ptr_type mod, const Section& metad
 							} break;
 						}
 					}
-					rq->success ();
-				} catch (CORBA::UserException& ex) {
-					rq->set_exception (std::move (ex));
-				}
-				SYNC_END ();
-				CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
+				});
 			}
 
 			// Pass 4: Import objects.
@@ -373,17 +363,16 @@ Module* Binder::create_module (int32_t mod_id, AccessDirect::_ptr_type binary)
 {
 	Module* mod = nullptr;
 	// Module loading may be a long operation, do it in core context.
-	Ref <Request> rq = Request::create ();
-	rq->invoke ();
-	SYNC_BEGIN (g_core_free_sync_context, &memory ());
 	try {
-		mod = create_module_sync (mod_id, binary);
-		rq->success ();
-	} catch (CORBA::UserException& ex) {
-		rq->set_exception (std::move (ex));
+		call_with_user_exceptions (g_core_free_sync_context, &memory (), [&mod, mod_id, binary]()
+			{ mod = create_module_sync (mod_id, binary); });
+	} catch (UnknownUserException& ex) {
+		BindError::Error err;
+		if (std::move (ex.exception ()) >>= err)
+			throw err;
+		else
+			throw;
 	}
-	SYNC_END ();
-	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
 	return mod;
 }
 
@@ -464,26 +453,18 @@ void Binder::bind_and_init (Module& mod, ModuleContext& context)
 
 	binary_map_.add (mod);
 
-	BindResult ret;
-	Ref <Request> rq = Request::create ();
-	rq->invoke ();
-	SYNC_BEGIN (context.sync_context, mod.initterm_mem_context ());
-	try {
-		try {
-			mod.initialize ();
-		} catch (const SystemException& ex) {
-			module_unbind (mod._get_ptr (), mod.metadata ());
-			BindError::Error err;
-			BindError::set_system (err, ex);
-			BindError::set_message (BindError::push (err), "Module initialization error");
-			throw err;
-		}
-		rq->success ();
-	} catch (CORBA::UserException& ex) {
-		rq->set_exception (std::move (ex));
-	}
-	SYNC_END ();
-	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
+	call_with_user_exceptions (context.sync_context, mod.initterm_mem_context (), [&mod]() {
+			try {
+				mod.initialize ();
+			} catch (const SystemException& ex) {
+				module_unbind (mod._get_ptr (), mod.metadata ());
+				BindError::Error err;
+				BindError::set_system (err, ex);
+				BindError::set_message (BindError::push (err), "Module initialization error");
+				throw err;
+			}
+		});
+
 	mod.on_load_complete ();
 }
 
@@ -606,18 +587,9 @@ NIRVANA_NORETURN void Binder::throw_object_not_in_module (const ObjectKey& name,
 Binder::BindResult Binder::bind_interface (CORBA::Internal::String_in name, CORBA::Internal::String_in iid)
 {
 	BindResult ret;
-	Ref <Request> rq = Request::create ();
-	rq->invoke ();
-	SYNC_BEGIN (sync_domain (), nullptr);
-	try {
-		rq->unmarshal_end ();
-		ret = singleton_->bind_interface_sync (name, iid);
-		rq->success ();
-	} catch (CORBA::UserException& e) {
-		rq->set_exception (std::move (e));
-	}
-	SYNC_END ();
-	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
+	call_with_user_exceptions (sync_domain (), nullptr, [&ret, &name, &iid]() {
+			ret = singleton_->bind_interface_sync (name, iid);
+		});
 	return ret;
 }
 
@@ -718,18 +690,10 @@ Binder::BindResult Binder::load_and_bind (int32_t mod_id,
 	Nirvana::AccessDirect::_ptr_type binary, String_in name, String_in iid)
 {
 	Binder::BindResult ret;
-	Ref <Request> rq = Request::create ();
-	rq->invoke ();
-	SYNC_BEGIN (sync_domain (), nullptr);
-	try {
-		rq->unmarshal_end ();
-		ret = singleton_->load_and_bind_sync (mod_id, binary, ObjectKey (name.data (), name.size ()), iid);
-		rq->success ();
-	} catch (CORBA::Exception& e) {
-		rq->set_exception (std::move (e));
-	}
-	SYNC_END ();
-	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
+	ObjectKey objkey (name.data (), name.size ());
+	call_with_user_exceptions (sync_domain (), nullptr, [&ret, mod_id, binary, &objkey, &iid]() {
+			ret = singleton_->load_and_bind_sync (mod_id, binary, objkey, iid);
+		});
 	return ret;
 }
 
@@ -804,7 +768,7 @@ void Binder::get_module_bindings_sync (Nirvana::AccessDirect::_ptr_type binary,
 
 void Binder::get_module_bindings (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings)
 {
-	Ref <Request> rq = Request::create ();
+	Ref <InternalRequest> rq = InternalRequest::create ();
 	rq->invoke ();
 	SYNC_BEGIN (sync_domain (), nullptr);
 	try {

@@ -466,6 +466,8 @@ private:
 	void get_module_bindings_sync (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings);
 
 	void housekeeping_modules ();
+	static Module* create_module (int32_t mod_id, AccessDirect::_ptr_type file);
+	static Module* create_module_sync (int32_t mod_id, AccessDirect::_ptr_type binary);
 	void delete_module (Module* mod) noexcept;
 	void unload_modules ();
 

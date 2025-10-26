@@ -339,6 +339,54 @@ void Binder::module_unbind (Nirvana::Module::_ptr_type mod, const Section& metad
 	}
 }
 
+inline Module* Binder::create_module_sync (int32_t mod_id, AccessDirect::_ptr_type binary)
+{
+	// Load module into memory
+	Port::Module bin (binary);
+
+	// Find module entry point
+	const ModuleStartup* startup = nullptr;
+	const Section& metadata = bin.metadata ();
+	for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
+		if (!it.valid ())
+			BindError::throw_invalid_metadata ();
+		if (OLF_MODULE_STARTUP == *it.cur ()) {
+			if (startup)
+				BindError::throw_message ("Duplicated OLF_MODULE_STARTUP entry");
+			startup = reinterpret_cast <const ModuleStartup*> (it.cur ());
+		}
+	}
+
+	if (!startup)
+		BindError::throw_message ("OLF_MODULE_STARTUP not found");
+
+	Module* ret;
+	if (startup->flags & OLF_MODULE_SINGLETON)
+		ret = new Singleton (mod_id, std::move (bin), *startup);
+	else
+		ret = new ClassLibrary (mod_id, std::move (bin), *startup);
+
+	return ret;
+}
+
+Module* Binder::create_module (int32_t mod_id, AccessDirect::_ptr_type binary)
+{
+	Module* mod = nullptr;
+	// Module loading may be a long operation, do it in core context.
+	Ref <Request> rq = Request::create ();
+	rq->invoke ();
+	SYNC_BEGIN (g_core_free_sync_context, &memory ());
+	try {
+		mod = create_module_sync (mod_id, binary);
+		rq->success ();
+	} catch (CORBA::UserException& ex) {
+		rq->set_exception (std::move (ex));
+	}
+	SYNC_END ();
+	CORBA::Internal::ProxyRoot::check_request (rq->_get_ptr ());
+	return mod;
+}
+
 void Binder::delete_module (Module* mod) noexcept
 {
 	if (mod) {
@@ -374,12 +422,7 @@ Ref <Module> Binder::load (int32_t mod_id, AccessDirect::_ptr_type binary)
 		try {
 			auto wait_list = entry.second.wait_list ();
 			try {
-
-				// Module loading may be a long operation, do it in core context.
-				SYNC_BEGIN (g_core_free_sync_context, &memory ());
-				mod = Module::create (mod_id, binary);
-				SYNC_END ();
-
+				mod = create_module (mod_id, binary);
 				assert (mod->_refcount_value () == 0);
 				ModuleContext context (mod);
 				bind_and_init (*mod, context);
@@ -389,7 +432,6 @@ Ref <Module> Binder::load (int32_t mod_id, AccessDirect::_ptr_type binary)
 					terminate_and_unbind (*mod);
 					throw;
 				}
-
 			} catch (...) {
 				module_map_.erase (entry.first);
 				wait_list->on_exception ();
@@ -694,11 +736,7 @@ Binder::BindResult Binder::load_and_bind (int32_t mod_id,
 void Binder::get_module_bindings_sync (Nirvana::AccessDirect::_ptr_type binary,
 	PM::ModuleBindings& bindings)
 {
-	Module* mod = nullptr;
-	SYNC_BEGIN (g_core_free_sync_context, &memory ());
-	mod = Module::create (-1, binary);
-	SYNC_END ();
-
+	Module* mod = create_module (-1, binary);
 	ModuleContext context (mod, true);
 	try {
 		bind_and_init (*mod, context);

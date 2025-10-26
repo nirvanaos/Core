@@ -24,12 +24,6 @@
 *  popov.nirvana@gmail.com
 */
 #include "Module.h"
-#include <Nirvana/OLF_Iterator.h>
-#include "ClassLibrary.h"
-#include "Singleton.h"
-#include "Binder.h"
-#include "ExecDomain.h"
-#include <Nirvana/BindErrorUtl.h>
 
 namespace Nirvana {
 namespace Core {
@@ -38,6 +32,7 @@ Module::Module (int32_t id, Port::Module&& bin, const ModuleStartup& startup_ent
 	Binary (std::move (bin)),
 	startup_entry_ (startup_entry),
 	entry_point_ (ModuleInit::_check (startup_entry.startup)),
+	release_time_ (0),
 	ref_cnt_ (0),
 	initial_ref_cnt_ (0),
 	id_ (id)
@@ -74,36 +69,6 @@ void Module::raise_exception (CORBA::SystemException::Code code, unsigned minor)
 	CORBA::Internal::Bridge <ModuleInit>* br = static_cast <CORBA::Internal::Bridge <ModuleInit>*> (&entry_point_);
 	if (br)
 		br->_epv ().epv.raise_exception (br, (short)code, (unsigned short)minor, nullptr);
-}
-
-Module* Module::create (int32_t id, AccessDirect::_ptr_type file)
-{
-	// Load module into memory
-	Port::Module bin (file);
-
-	// Find module entry point
-	const ModuleStartup* startup = nullptr;
-	const Section& metadata = bin.metadata ();
-	for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
-		if (!it.valid ())
-			BindError::throw_invalid_metadata ();
-		if (OLF_MODULE_STARTUP == *it.cur ()) {
-			if (startup)
-				BindError::throw_message ("Duplicated OLF_MODULE_STARTUP entry");
-			startup = reinterpret_cast <const ModuleStartup*> (it.cur ());
-		}
-	}
-
-	if (!startup)
-		BindError::throw_message ("OLF_MODULE_STARTUP not found");
-
-	Module* ret;
-	if (startup->flags & OLF_MODULE_SINGLETON)
-		ret = new Singleton (id, std::move (bin), *startup);
-	else
-		ret = new ClassLibrary (id, std::move (bin), *startup);
-
-	return ret;
 }
 
 }

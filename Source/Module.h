@@ -50,8 +50,6 @@ class NIRVANA_NOVTABLE Module :
 	public CORBA::Internal::LifeCycleRefCnt <Module>
 {
 public:
-	static Module* create (int32_t id, AccessDirect::_ptr_type file);
-
 	/// Derived ClassLibrary and Singleton classes must have virtual destructors.
 	virtual ~Module ()
 	{}
@@ -140,7 +138,6 @@ protected:
 	AtomicCounter <false> ref_cnt_;
 	AtomicCounter <false>::IntegralType initial_ref_cnt_;
 	int32_t id_;
-	unsigned flags_;
 };
 
 }

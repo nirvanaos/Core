@@ -161,43 +161,7 @@ public:
 		return info;
 	}
 
-	void get_module_bindings (Nirvana::ModuleId id, Nirvana::PM::ModuleBindings& metadata)
-	{
-		auto stm = get_statement (
-			"SELECT name,version,prerelease,flags FROM module WHERE id=?1;"
-			"SELECT name,major,minor,interface,type FROM export WHERE module=?1 ORDER BY name,major,minor;"
-			"SELECT name,version,interface FROM import WHERE module=?1 ORDER BY name,version,interface;"
-		);
-		stm->setInt (1, id);
-
-		auto rs = stm->executeQuery ();
-
-		if (rs->next ()) {
-			Nirvana::SemVer name (rs->getString (1), rs->getBigInt (2), rs->getString (3));
-			metadata.mod ().name (name.to_string ());
-			metadata.mod ().flags (rs->getSmallInt (4));
-		} else
-			throw Nirvana::PM::PackageDB::ModuleNotFound ();
-
-		NIRVANA_VERIFY (stm->getMoreResults ());
-		rs = stm->getResultSet ();
-
-		while (rs->next ()) {
-			metadata.exports ().emplace_back (
-				Nirvana::PM::ObjBinding (rs->getString (1), rs->getSmallInt (2), rs->getSmallInt (3),
-					rs->getString (4)),
-				(Nirvana::PM::ObjType)rs->getInt (5));
-		}
-
-		NIRVANA_VERIFY (stm->getMoreResults ());
-		rs = stm->getResultSet ();
-
-		while (rs->next ()) {
-			uint32_t ver = rs->getInt (2);
-			metadata.imports ().emplace_back (rs->getString (1), major (ver), minor (ver),
-				rs->getString (3));
-		}
-	}
+	void get_module_bindings (Nirvana::ModuleId id, Nirvana::PM::ModuleBindings& metadata);
 
 	Nirvana::PM::Packages::Modules get_module_dependencies (Nirvana::ModuleId id)
 	{

@@ -79,7 +79,7 @@ private:
 		IDL::String bin_path;
 		{
 			CosNaming::Name name;
-			the_system->append_path (name, argv [0], true);
+			the_system->append_path (name, argv [1], true);
 			bin_path = the_system->to_string (name);
 		}
 

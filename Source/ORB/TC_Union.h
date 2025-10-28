@@ -64,11 +64,11 @@ public:
 
 	typedef Nirvana::Core::Array <Member, Nirvana::Core::UserAllocator> Members;
 
-	TC_Union (IDL::String&& id, IDL::String&& name, TypeCode::_ref_type&& discriminator_type, Long default_index);
+	TC_Union (IDL::String&& id, IDL::String&& name, TypeCode::_ptr_type discriminator_type, Long default_index);
 
 	TC_Union (IDL::String&& id, IDL::String&& name, TypeCode::_ptr_type discriminator_type, Long default_index,
 		Members&& members) :
-		TC_Union (std::move (id), std::move (name), TypeCode::_ref_type (discriminator_type), default_index)
+		TC_Union (std::move (id), std::move (name), discriminator_type, default_index)
 	{
 		set_members (std::move (members));
 

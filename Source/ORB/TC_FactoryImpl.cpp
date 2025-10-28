@@ -347,7 +347,7 @@ TypeCode::_ref_type TC_FactoryImpl::unmarshal_type_code_cplx (TCKind kind, Strea
 		if (!cnt)
 			throw BAD_TYPECODE ();
 		servant_reference <TC_Union> ref = make_reference <TC_Union> (std::move (id), std::move (name),
-			std::move (discriminator_type), default_index);
+			discriminator_type, default_index);
 		TypeCode::_ptr_type tc = ref->_get_ptr ();
 		complex_objects_.emplace (&tc, ref);
 		indirect_map.emplace (start_pos, &tc);
@@ -356,30 +356,32 @@ TypeCode::_ref_type TC_FactoryImpl::unmarshal_type_code_cplx (TCKind kind, Strea
 			members.construct (cnt);
 			TC_Union::Member* pm = members.begin ();
 			for (ULong i = 0; i < cnt; ++pm, ++i) {
-				Octet buf [sizeof (ULongLong)];
-				stm.read (discriminator_size, discriminator_size, discriminator_size, 1, &buf);
-				if (stm.other_endian ()) {
-					switch (discriminator_size) {
-					case 2:
-						*(UShort*)buf = Nirvana::byteswap (*(UShort*)buf);
-						break;
-					case 4:
-						*(ULong*)buf = Nirvana::byteswap (*(ULong*)buf);
-						break;
-					case 8:
-						*(ULongLong*)buf = Nirvana::byteswap (*(ULongLong*)buf);
-						break;
-					}
-				}
 
 				// The discriminant value used in the actual typecode parameter associated with the default
 				// member position in the list, may be any valid value of the discriminant type, and has no
 				// semantic significance (i.e., it should be ignored and is only included for syntactic
 				// completeness of union type code marshaling).
-				if (i != default_index)
-					pm->label.copy_from (discriminator_type, buf);
-				else
+				if (i != default_index) {
+					pm->label.construct (discriminator_type);
+					void* data = pm->label.data ();
+					stm.read (discriminator_size, discriminator_size, discriminator_size, 1, data);
+					if (stm.other_endian ()) {
+						switch (discriminator_size) {
+							case 2:
+								*(UShort*)data = Nirvana::byteswap (*(UShort*)data);
+								break;
+							case 4:
+								*(ULong*)data = Nirvana::byteswap (*(ULong*)data);
+								break;
+							case 8:
+								*(ULongLong*)data = Nirvana::byteswap (*(ULongLong*)data);
+								break;
+						}
+					}
+				} else {
 					pm->label <<= Any::from_octet (0);
+					stm.read (discriminator_size, discriminator_size, discriminator_size, 1, nullptr);
+				}
 				stm.read_string (pm->name);
 				TypeCode::_ref_type mt = unmarshal_type_code (stm, indirect_map, encap_pos);
 				if (!mt)

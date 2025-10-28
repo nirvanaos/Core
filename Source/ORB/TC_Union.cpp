@@ -28,9 +28,9 @@
 namespace CORBA {
 namespace Core {
 
-TC_Union::TC_Union (IDL::String&& id, IDL::String&& name, TypeCode::_ref_type&& discriminator_type, Long default_index) :
+TC_Union::TC_Union (IDL::String&& id, IDL::String&& name, TypeCode::_ptr_type discriminator_type, Long default_index) :
 	Impl (TCKind::tk_union, std::move (id), std::move (name)),
-	discriminator_type_ (std::move (discriminator_type)),
+	discriminator_type_ (discriminator_type),
 	default_index_ (default_index)
 {
 	discriminator_size_ = discriminator_type_->n_size ();

@@ -1,4 +1,5 @@
-nirvana_module (PacMan IDL_FILES factory.idl)
+nirvana_module (PacMan IDL_FILES PacFactory.idl)
+
 target_sources (PacMan PRIVATE
 	Connection.cpp
 	man_factory.cpp

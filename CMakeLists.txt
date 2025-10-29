@@ -12,7 +12,7 @@ add_subdirectory (Source)
 set (core_idl)
 add_subdirectory (IDL)
 nirvana_module_idl (Core IDL_FILES ${core_idl} OPTIONS -no_proxy)
-nirvana_module_idl (Core IDL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/PacMan/factory.idl OPTIONS -client)
+nirvana_module_idl (Core IDL_FILES ${CMAKE_CURRENT_SOURCE_DIR}/PacMan/PacFactory.idl OPTIONS -client)
 
 # [===[
 target_precompile_headers (Core PRIVATE

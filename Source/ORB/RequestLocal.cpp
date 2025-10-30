@@ -60,7 +60,7 @@ void RequestLocalOneway::invoke ()
 		proxy ().get_sync_context (op_idx ()), target_heap (), std::ref (*this));
 }
 
-void RequestLocalOneway::Runnable::run ()
+void RequestLocalOneway::Runnable::run () noexcept
 {
 	request_->run ();
 }

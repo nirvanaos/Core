@@ -787,7 +787,7 @@ void Binder::get_module_bindings (AccessDirect::_ptr_type binary, PM::ModuleBind
 }
 
 inline
-void Binder::housekeeping_modules ()
+void Binder::housekeeping_modules () noexcept
 {
 	for (;;) {
 		bool found = false;
@@ -812,7 +812,7 @@ void Binder::housekeeping_modules ()
 		housekeeping_timer_modules_.cancel ();
 }
 
-void Binder::HousekeepingTimerModules::run (const TimeBase::TimeT& signal_time)
+void Binder::HousekeepingTimerModules::run (const TimeBase::TimeT& signal_time) noexcept
 {
 	singleton ().housekeeping_modules ();
 }
@@ -826,7 +826,7 @@ void Binder::housekeeping_domains () noexcept
 	}
 }
 
-void Binder::HousekeepingTimerDomains::run (const TimeBase::TimeT& signal_time)
+void Binder::HousekeepingTimerDomains::run (const TimeBase::TimeT& signal_time) noexcept
 {
 	singleton ().housekeeping_domains ();
 }

@@ -250,7 +250,7 @@ private:
 		{}
 
 	private:
-		virtual void run () override;
+		virtual void run () noexcept override;
 		virtual void on_crash (const siginfo& signal) noexcept override;
 
 	private:

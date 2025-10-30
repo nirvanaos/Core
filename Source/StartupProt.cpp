@@ -28,13 +28,13 @@
 namespace Nirvana {
 namespace Core {
 
-void StartupProt::run ()
+void StartupProt::run () noexcept
 {
 	if (initialize ()) {
 		try {
-			Startup::run ();
-		} catch (const CORBA::Exception& ex) {
-			on_exception (ex);
+			Startup::run_command ();
+		} catch (...) {
+			on_exception ();
 		}
 	}
 }

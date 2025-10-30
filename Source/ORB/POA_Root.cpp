@@ -178,7 +178,7 @@ public:
 	{}
 
 private:
-	virtual void run ();
+	virtual void run () noexcept;
 	virtual void on_crash (const siginfo& signal) noexcept;
 
 private:
@@ -199,7 +199,7 @@ void POA_Root::invoke_async (RequestRef request, DeadlineTime deadline)
 		adapter, std::move (request));
 }
 
-void POA_Root::InvokeAsync::run ()
+void POA_Root::InvokeAsync::run () noexcept
 {
 	try {
 		invoke_sync (*request_);

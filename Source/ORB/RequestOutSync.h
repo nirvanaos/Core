@@ -78,7 +78,7 @@ private:
 		{}
 
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 
 	private:
 		RequestOutSyncBase& obj_;

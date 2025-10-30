@@ -32,7 +32,7 @@
 namespace Nirvana {
 namespace Core {
 
-BackOff::BackOff () :
+BackOff::BackOff () noexcept :
 	iterations_ (1),
 	rndgen_ ((RandomGen::result_type)(uintptr_t)this)
 {}
@@ -40,7 +40,7 @@ BackOff::BackOff () :
 BackOff::~BackOff ()
 {}
 
-inline void BackOff::cpu_relax ()
+inline void BackOff::cpu_relax () noexcept
 {
 #if defined (_MSVC_LANG)
 	_mm_pause ();
@@ -49,7 +49,7 @@ inline void BackOff::cpu_relax ()
 #endif
 }
 
-void BackOff::operator () ()
+void BackOff::operator () () noexcept
 {
 	// TODO: We can try other distributions: geometric, exponential...
 	typedef std::uniform_int_distribution <unsigned> Dist;

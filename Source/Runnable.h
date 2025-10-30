@@ -40,7 +40,7 @@ class NIRVANA_NOVTABLE Runnable
 {
 public:
 	virtual ~Runnable () {}
-	virtual void run () = 0;
+	virtual void run () noexcept = 0;
 	virtual void on_crash (const siginfo& signal) noexcept;
 };
 

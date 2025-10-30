@@ -30,14 +30,14 @@
 namespace Nirvana {
 namespace Core {
 
-void StartupSys::run ()
+void StartupSys::run () noexcept
 {
 	if (initialize ()) {
 		try {
 			CORBA::Core::Services::bind (CORBA::Core::Services::SysDomain);
-			Startup::run ();
-		} catch (const CORBA::Exception& ex) {
-			on_exception (ex);
+			Startup::run_command ();
+		} catch (...) {
+			on_exception ();
 		}
 	}
 }

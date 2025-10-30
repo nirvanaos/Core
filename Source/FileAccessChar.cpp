@@ -226,7 +226,7 @@ CORBA::Any FileAccessChar::pull_queue_pop () noexcept
 	return ret;
 }
 
-void FileAccessChar::ReadCallback::run ()
+void FileAccessChar::ReadCallback::run () noexcept
 {
 	object_->read_callback ();
 }

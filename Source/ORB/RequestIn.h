@@ -180,7 +180,7 @@ private:
 		{}
 
 	private:
-		virtual void run () override;
+		virtual void run () noexcept override;
 
 	private:
 		RequestIn& request_;

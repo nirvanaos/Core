@@ -37,19 +37,19 @@
 namespace Nirvana {
 namespace Core {
 
-void Scheduler::Shutdown::run ()
+void Scheduler::Shutdown::run () noexcept
 {
 	do_shutdown ();
 }
 
-void Scheduler::Terminator2::run ()
+void Scheduler::Terminator2::run () noexcept
 {
 	// Terminate
 	NIRVANA_TRACE ("Core::terminate2 ()");
 	Core::terminate2 ();
 }
 
-void Scheduler::Terminator1::run ()
+void Scheduler::Terminator1::run () noexcept
 {
 	// Terminate
 	// Ensure that all asynchronous GC is completed.
@@ -71,7 +71,7 @@ bool Scheduler::async_GC_allowed () noexcept
 		&& ExecDomain::current ().restricted_mode () != ExecDomain::RestrictedMode::SUPPRESS_ASYNC_GC;
 }
 
-void Scheduler::do_shutdown ()
+void Scheduler::do_shutdown () noexcept
 {
 #ifdef DEBUG_SHUTDOWN
 	the_debugger->debug_event (Debugger::DebugEvent::DEBUG_INFO, "Core::shutdown ()", __FILE__, __LINE__);

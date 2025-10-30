@@ -229,7 +229,7 @@ public:
 	static void reschedule () noexcept;
 
 	/// \brief Called from the Port implementation.
-	void run ()
+	void run () noexcept
 	{
 		assert (Thread::current ().exec_domain () == this);
 		assert (runnable_);
@@ -556,7 +556,7 @@ private:
 		void ret (SyncContext& target) noexcept;
 
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 
 	private:
 		SyncContext* sync_context_;
@@ -567,19 +567,19 @@ private:
 	class Deleter : public Runnable
 	{
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 	};
 
 	class Reschedule : public Runnable
 	{
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 	};
 
 	class Suspend : public Runnable
 	{
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 	};
 
 private:

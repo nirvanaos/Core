@@ -122,7 +122,7 @@ public:
 		{}
 
 	protected:
-		void run () override;
+		void run () noexcept override;
 
 	private:
 		unsigned flags_;

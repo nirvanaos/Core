@@ -142,26 +142,26 @@ private:
 
 	static bool start_shutdown (State& from_state) noexcept;
 
-	static void do_shutdown ();
+	static void do_shutdown () noexcept;
 
 	static void toggle_activity () noexcept;
 
 	class Shutdown : public Runnable
 	{
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 	};
 
 	class Terminator2 : public Runnable
 	{
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 	};
 
 	class Terminator1 : public Runnable
 	{
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 	};
 
 	struct GlobalData

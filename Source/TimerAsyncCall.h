@@ -63,7 +63,7 @@ public:
 protected:
 	TimerAsyncCall (SyncContext& sync_context, const DeadlineTime& deadline);
 
-	virtual void run (const TimeBase::TimeT& signal_time) = 0;
+	virtual void run (const TimeBase::TimeT& signal_time) noexcept = 0;
 
 private:
 	void signal () noexcept override;
@@ -87,7 +87,7 @@ private:
 		}
 
 	private:
-		virtual void run () override;
+		void run () noexcept override;
 
 	private:
 		Ref <TimerAsyncCall> timer_;

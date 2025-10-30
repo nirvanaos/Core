@@ -80,7 +80,7 @@ private:
 		{}
 
 	private:
-		void run (const TimeBase::TimeT&) override
+		void run (const TimeBase::TimeT&) noexcept override
 		{
 			if (object_)
 				((Timeout*)object_)->call_on_timer ();

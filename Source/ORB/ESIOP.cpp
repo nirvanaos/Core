@@ -54,7 +54,7 @@ public:
 	{}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 	virtual void on_crash (const siginfo& signal) noexcept override;
 
 private:
@@ -64,7 +64,7 @@ private:
 	uint32_t request_id_;
 };
 
-void ReceiveRequest::run ()
+void ReceiveRequest::run () noexcept
 {
 	try {
 		// Create input stream
@@ -130,7 +130,7 @@ public:
 	{}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 
 private:
 	uint64_t timestamp_;
@@ -138,7 +138,7 @@ private:
 	uint32_t request_id_;
 };
 
-void ReceiveCancel::run ()
+void ReceiveCancel::run () noexcept
 {
 	IncomingRequests::cancel (RequestKey (client_id_, request_id_), timestamp_);
 }
@@ -154,14 +154,14 @@ public:
 	{}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 
 private:
 	void* data_;
 	uint32_t request_id_;
 };
 
-void ReceiveReply::run ()
+void ReceiveReply::run () noexcept
 {
 	try {
 		// Create input stream
@@ -226,7 +226,7 @@ public:
 	}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 
 private:
 #if UINTPTR_MAX <= UINT16_MAX
@@ -256,7 +256,7 @@ private:
 	alignas (8) uint8_t data_ [ReplyImmediate::MAX_DATA_SIZE];
 };
 
-void ReceiveReplyImmediate::run ()
+void ReceiveReplyImmediate::run () noexcept
 {
 	OutgoingRequests::receive_reply_immediate (request_id_,
 		servant_reference <StreamIn>::create <ImplDynamic <StreamInImmediate> > (std::ref (*this)));
@@ -275,7 +275,7 @@ public:
 	{}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 
 private:
 	CompletionStatus completed_;
@@ -284,7 +284,7 @@ private:
 	uint32_t request_id_;
 };
 
-void ReceiveSystemException::run ()
+void ReceiveSystemException::run () noexcept
 {
 	OutgoingRequests::set_system_exception (request_id_, code_, minor_, completed_);
 }
@@ -299,13 +299,13 @@ public:
 	{}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 
 private:
 	ESIOP::ProtDomainId domain_id_;
 };
 
-void ReceiveCloseConnection::run ()
+void ReceiveCloseConnection::run () noexcept
 {
 	Nirvana::Core::Binder::singleton ().remote_references ().close_connection (domain_id_);
 }
@@ -323,13 +323,13 @@ public:
 	{}
 
 private:
-	virtual void run () override;
+	virtual void run () noexcept override;
 
 private:
 	Security::Context security_context_;
 };
 
-void ReceiveShutdownSys::run ()
+void ReceiveShutdownSys::run () noexcept
 {
 	try {
 		ExecDomain::set_impersonation_context (std::move (security_context_));

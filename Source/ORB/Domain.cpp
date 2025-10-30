@@ -206,7 +206,7 @@ void Domain::make_zombie () noexcept
 	local_objects_.clear ();
 }
 
-void Domain::GC::run ()
+void Domain::GC::run () noexcept
 {
 	domain_->DGC_scheduled_ = false;
 	domain_->send_del ();

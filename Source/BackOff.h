@@ -38,13 +38,13 @@ class BackOff :
 	private Port::BackOff
 {
 public:
-	BackOff ();
+	BackOff () noexcept;
 	~BackOff ();
 
-	void operator () ();
+	void operator () () noexcept;
 
 private:
-	inline void cpu_relax ();
+	inline void cpu_relax () noexcept;
 
 private:
 	unsigned iterations_;

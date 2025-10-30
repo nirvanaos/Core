@@ -30,7 +30,7 @@
 
 #include <CORBA/CORBA.h>
 #include "Runnable.h"
-#include "ORB/SystemExceptionHolder.h"
+#include <exception>
 
 namespace Nirvana {
 namespace Core {
@@ -44,13 +44,12 @@ public:
 	/// All life in the domain started from this asynchronous call.
 	/// 
 	/// \param deadline Domain startup deadline.
-	void launch (DeadlineTime deadline);
-
-	virtual void run ();
+	void launch (DeadlineTime deadline) noexcept;
 
 	void check () const
 	{
-		exception_.check ();
+		if (exception_)
+			std::rethrow_exception (exception_);
 	}
 
 	int ret () const noexcept
@@ -59,15 +58,14 @@ public:
 	}
 
 protected:
-	Startup (int argc, char* argv []);
+	Startup (int argc, char* argv []) noexcept;
 
 	~Startup ()
 	{}
 
 	bool initialize () noexcept;
-
-	virtual void on_crash (const siginfo& signal) noexcept;
-	void on_exception (const CORBA::Exception& ex) noexcept;
+	void run_command ();
+	void on_exception () noexcept;
 
 protected:
 	int argc_;
@@ -75,7 +73,7 @@ protected:
 	int ret_;
 
 private:
-	CORBA::Core::SystemExceptionHolder exception_;
+	std::exception_ptr exception_;
 };
 
 }

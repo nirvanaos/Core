@@ -192,7 +192,7 @@ void ExecDomain::final_release () noexcept
 	Scheduler::activity_end ();
 }
 
-void ExecDomain::Deleter::run ()
+void ExecDomain::Deleter::run () noexcept
 {
 	Thread& th = Thread::current ();
 	ExecDomain* ed = th.exec_domain ();
@@ -361,7 +361,7 @@ DeadlineTime ExecDomain::get_request_deadline (bool oneway) const noexcept
 	return dl;
 }
 
-void ExecDomain::Schedule::run ()
+void ExecDomain::Schedule::run () noexcept
 {
 	Thread& th = Thread::current ();
 	ExecDomain* ed = th.exec_domain ();
@@ -507,14 +507,14 @@ bool ExecDomain::suspended () const noexcept
 	}
 }
 
-void ExecDomain::Reschedule::run ()
+void ExecDomain::Reschedule::run () noexcept
 {
 	ExecDomain& ed = ExecDomain::current ();
 	ed.suspend_prepared ();
 	ed.resume ();
 }
 
-void ExecDomain::Suspend::run ()
+void ExecDomain::Suspend::run () noexcept
 {
 	ExecDomain::current ().suspend_prepared ();
 }

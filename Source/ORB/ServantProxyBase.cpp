@@ -43,13 +43,13 @@ public:
 	{}
 
 private:
-	virtual void run ();
+	virtual void run () noexcept override;
 
 private:
 	Interface::_ptr_type servant_;
 };
 
-void ServantProxyBase::GC::run ()
+void ServantProxyBase::GC::run () noexcept
 {
 	collect_garbage (servant_);
 }

@@ -318,7 +318,7 @@ private:
 		{}
 
 	private:
-		void run (const TimeBase::TimeT& signal_time) override
+		void run (const TimeBase::TimeT& signal_time) noexcept override
 		{
 			if (driver_)
 				driver_->housekeeping (signal_time);

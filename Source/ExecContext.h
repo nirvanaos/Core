@@ -90,7 +90,7 @@ public:
 	// Execute Runnable in the neutral context
 	static void run_in_neutral_context (Runnable& runnable) noexcept;
 
-	void run ()
+	void run () noexcept
 	{
 		assert (runnable_);
 		runnable_->run ();

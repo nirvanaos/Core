@@ -83,7 +83,7 @@ void SysManager::shutdown (unsigned flags) noexcept
 	}
 }
 
-void SysManager::ReceiveShutdown::run ()
+void SysManager::ReceiveShutdown::run () noexcept
 {
 	try {
 		sys_manager ().shutdown (flags_);

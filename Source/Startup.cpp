@@ -36,18 +36,22 @@
 namespace Nirvana {
 namespace Core {
 
-Startup::Startup (int argc, char* argv []) :
+Startup::Startup (int argc, char* argv []) noexcept :
 	argc_ (argc),
 	argv_ (argv),
 	ret_ (0)
 {}
 
-void Startup::launch (DeadlineTime deadline)
+void Startup::launch (DeadlineTime deadline) noexcept
 {
-	ExecDomain::async_call (deadline, *this, g_core_free_sync_context, &Heap::shared_heap ());
+	try {
+		ExecDomain::async_call (deadline, *this, g_core_free_sync_context, &Heap::shared_heap ());
+	} catch (...) {
+		on_exception ();
+	}
 }
 
-void Startup::run ()
+void Startup::run_command ()
 {
 	if (argc_ > 1) {
 
@@ -92,24 +96,15 @@ bool Startup::initialize () noexcept
 	try {
 		Nirvana::Core::initialize ();
 	} catch (const CORBA::Exception& ex) {
-		on_exception (ex);
+		on_exception ();
 		return false;
 	}
 	return true;
 }
 
-void Startup::on_exception (const CORBA::Exception& ex) noexcept
+void Startup::on_exception () noexcept
 {
-	exception_.set_exception (ex);
-	Scheduler::shutdown (0);
-}
-
-void Startup::on_crash (const siginfo& signal) noexcept
-{
-	if (signal.si_excode == CORBA::Exception::EC_NO_EXCEPTION)
-		exception_.set_exception (CORBA::SystemException::EC_UNKNOWN);
-	else
-		exception_.set_exception ((CORBA::SystemException::Code)signal.si_excode);
+	exception_ = std::current_exception ();
 	Scheduler::shutdown (0);
 }
 

@@ -29,7 +29,7 @@
 namespace CORBA {
 namespace Core {
 
-void RequestOutSyncBase::WaitOp::run ()
+void RequestOutSyncBase::WaitOp::run () noexcept
 {
 	obj_.source_exec_domain_->suspend_prepared ();
 	if (obj_.state_.exchange (State::SUSPENDED) == State::FINALIZED)

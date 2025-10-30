@@ -61,7 +61,7 @@ noexcept
 	}
 }
 
-void GarbageCollector::run ()
+void GarbageCollector::run () noexcept
 {
 	try {
 		ref_ = nullptr;

@@ -48,7 +48,7 @@ public:
 	~StartupProt ()
 	{}
 
-	virtual void run () override;
+	virtual void run () noexcept override;
 };
 
 }

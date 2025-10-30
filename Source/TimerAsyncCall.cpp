@@ -50,7 +50,7 @@ void TimerAsyncCall::signal () noexcept
 		++overrun_;
 }
 
-void TimerAsyncCall::Runnable::run ()
+void TimerAsyncCall::Runnable::run () noexcept
 {
 	timer_->run (signal_time_);
 }

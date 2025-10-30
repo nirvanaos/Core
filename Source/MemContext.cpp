@@ -138,7 +138,7 @@ public:
 	{}
 
 private:
-	virtual void run () override
+	virtual void run () noexcept override
 	{
 		mc_.destroy (ExecDomain::current ());
 	}

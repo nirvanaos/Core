@@ -34,7 +34,7 @@ using namespace Nirvana::Core;
 namespace PortableServer {
 namespace Core {
 
-void POAManager::ServeRequest::run ()
+void POAManager::ServeRequest::run () noexcept
 {
 	try {
 		// Check that adapter is not destroyed.

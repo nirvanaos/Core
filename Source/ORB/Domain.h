@@ -376,7 +376,7 @@ private:
 		{}
 
 	private:
-		virtual void run () override;
+		virtual void run () noexcept override;
 
 	private:
 		servant_reference <Domain> domain_;

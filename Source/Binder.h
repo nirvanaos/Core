@@ -504,7 +504,7 @@ private:
 
 	void get_module_bindings_sync (AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings);
 
-	void housekeeping_modules ();
+	void housekeeping_modules () noexcept;
 	static Module* create_module (int32_t mod_id, AccessDirect::_ptr_type file);
 	static Module* create_module_sync (int32_t mod_id, AccessDirect::_ptr_type binary);
 	void delete_module (Module* mod) noexcept;
@@ -520,7 +520,7 @@ private:
 		{}
 
 	private:
-		virtual void run (const TimeBase::TimeT& signal_time);
+		void run (const TimeBase::TimeT& signal_time) noexcept override;
 	};
 
 	void housekeeping_domains () noexcept;
@@ -533,7 +533,7 @@ private:
 		{}
 
 	private:
-		virtual void run (const TimeBase::TimeT& signal_time);
+		void run (const TimeBase::TimeT& signal_time) noexcept override;
 	};
 
 private:

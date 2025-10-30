@@ -80,13 +80,13 @@ private:
 		{}
 
 	private:
-		virtual void run ();
+		virtual void run () noexcept override;
 
 	private:
 		servant_reference <RequestLocalOneway> request_;
 	};
 
-	void run ()
+	void run () noexcept
 	{
 		assert (&Nirvana::Core::SyncContext::current () == &proxy ().get_sync_context (op_idx ()));
 		Base::invoke_sync ();

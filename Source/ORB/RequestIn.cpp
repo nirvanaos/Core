@@ -428,7 +428,7 @@ void RequestIn::DelayedReleaseTimer::signal () noexcept
 	}
 }
 
-void RequestIn::DelayedRelease::run ()
+void RequestIn::DelayedRelease::run () noexcept
 {
 	request_.delayed_release ();
 }

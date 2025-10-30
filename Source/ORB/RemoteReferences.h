@@ -147,7 +147,7 @@ public:
 		get_domain (domain)->complex_ping (rq);
 	}
 
-	void close_connection (ESIOP::ProtDomainId domain_id)
+	void close_connection (ESIOP::ProtDomainId domain_id) noexcept
 	{
 		servant_reference <DomainProt> domain = prot_domains_.find (domain_id);
 		if (domain)

@@ -239,7 +239,7 @@ private:
 		{}
 
 	private:
-		virtual void run () override;
+		virtual void run () noexcept override;
 
 	private:
 		Ref <FileAccessChar> object_;

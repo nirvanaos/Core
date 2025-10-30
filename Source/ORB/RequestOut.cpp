@@ -312,7 +312,7 @@ public:
 		id_ (id)
 	{}
 
-	virtual void run () override
+	virtual void run () noexcept override
 	{
 		OutgoingRequests::set_system_exception (id_, TIMEOUT (MAKE_OMG_MINOR (3)));
 	}

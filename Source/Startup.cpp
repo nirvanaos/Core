@@ -56,11 +56,13 @@ void Startup::run_command ()
 	if (argc_ > 1) {
 
 		bool cmdlet = false;
-		const char* prog = argv_ [1];
-		char** args = argv_ + 2, ** end = argv_ + argc_;
+		char** args = argv_ + 1, ** end = argv_ + argc_;
+		const char* first = *args;
 
-		if (prog [0] == '-' && prog [1] == 'c' && prog [2] == 0 && args != end) {
-			prog = *(args++);
+		if (first [0] == '-' && first [1] == 'c' && first [2] == 0) {
+			++args;
+			if (args == end)
+				throw_BAD_PARAM ();
 			cmdlet = true;
 		}
 		
@@ -73,10 +75,10 @@ void Startup::run_command ()
 		FileDescriptors files = MemContext::current ().get_inherited_files (6);
 
 		if (cmdlet) {
-			ret_ = (int)the_shell->cmdlet (prog, argv, "/sbin", files);
+			ret_ = (int)the_shell->cmdlet (argv, "/sbin", files);
 		} else {
 
-			IDL::String exe_path = prog;
+			IDL::String exe_path = argv [0];
 			IDL::String translated;
 			if (FileSystem::translate_path (exe_path, translated))
 				exe_path = std::move (translated);

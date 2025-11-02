@@ -58,10 +58,11 @@ public:
 		return ret;
 	}
 
-	static int cmdlet (const IDL::String& name, StringSeq& argv,
-		IDL::String& work_dir, FileDescriptors& files)
+	static int cmdlet (StringSeq& argv, IDL::String& work_dir, FileDescriptors& files)
 	{
-		auto cmdlet = Core::Binder::bind_interface (name, CORBA::Internal::RepIdOf <Cmdlet>::id);
+		if (argv.empty ())
+			throw_BAD_PARAM ();
+		auto cmdlet = Core::Binder::bind_interface (argv [0], CORBA::Internal::RepIdOf <Cmdlet>::id);
 
 		int ret = -1;
 		SYNC_BEGIN (*cmdlet.sync_context, &Core::Heap::user_heap ());

@@ -40,7 +40,7 @@ public:
 	static int run (StringSeq& argv)
 	{
 		static const char usage [] = "Usage: pacman <command> [parameters]";
-		if (argv.size () < 1) {
+		if (argv.size () <= 1) {
 			print (1, usage);
 			return -1;
 		}
@@ -51,11 +51,11 @@ public:
 			auto packages = SysDomain::_narrow (CORBA::the_orb->resolve_initial_references ("SysDomain")
 				)->provide_packages ();
 			try {
-				if (argv [0] == "reg-bin")
+				if (argv [1] == "reg-bin")
 					ret = reg_bin (packages, argv);
 				else {
 					print (2, "Unknown command: ");
-					print (2, argv [0]);
+					print (2, argv [1]);
 					println (2);
 				}
 			} catch (const BindError::Error& ex) {
@@ -79,7 +79,7 @@ private:
 		IDL::String bin_path;
 		{
 			CosNaming::Name name;
-			the_system->append_path (name, argv [1], true);
+			the_system->append_path (name, argv [2], true);
 			bin_path = the_system->to_string (name);
 		}
 
@@ -177,7 +177,7 @@ void Static_pacman::print (PM::PackageDB::_ptr_type packages, const BindError::I
 
 	case BindError::Type::ERR_SYSTEM: {
 		CORBA::UNKNOWN se;
-		err.system_exception () >>= se;
+		err.system_exception () >>= static_cast <CORBA::SystemException&> (se);
 		print (se);
 	} break;
 

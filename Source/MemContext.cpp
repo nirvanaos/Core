@@ -106,7 +106,8 @@ public:
 		// Increment reference counter to prevent recursive deletion
 		mc.ref_cnt_.increment ();
 		if (ed.mem_context_stack_empty ()) {
-			// If context stack is empty, mem_context_push definitely won't throw an exception.
+			// If context stack is empty, mem_context_push definitely won't throw an exception
+			// (stack has preallocated space).
 			pop_ = true;
 			ed.mem_context_push (&mc);
 		} else {

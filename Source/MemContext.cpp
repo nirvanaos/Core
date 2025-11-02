@@ -190,11 +190,12 @@ void MemContext::destroy (ExecDomain& cur_ed) noexcept
 	else
 		heap = heap_;
 
-	{
+	if (cur_ed.mem_context_ptr () != this) {
 		// Replace memory context and call destructor
 		Replacer replace (*this, cur_ed);
 		this->~MemContext ();
-	}
+	} else
+		this->~MemContext ();
 
 	// Release memory
 	heap->release (this, sizeof (MemContext));

@@ -528,15 +528,12 @@ private:
 	{
 		// Clear memory context stack
 		Ref <MemContext> tmp;
-		for (;;) {
+		do {
 			tmp = std::move (mem_context_stack_.top ());
 			mem_context_stack_.pop ();
-			if (mem_context_stack_.empty ())
-				break;
-			mem_context_ = mem_context_stack_.top ();
-		}
+			mem_context_ = tmp;
+		} while (!mem_context_stack_.empty ());
 		mem_context_stack_.push (std::move (tmp));
-		mem_context_ = mem_context_stack_.top ();
 #ifndef NDEBUG
 		dbg_mem_context_stack_size_ = 1;
 #endif

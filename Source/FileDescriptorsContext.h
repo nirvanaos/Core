@@ -31,7 +31,7 @@
 #include <Nirvana/Nirvana.h>
 #include <Nirvana/File.h>
 #include <Nirvana/posix_defs.h>
-#include <Nirvana/Shell.h> // For FileDescriptors
+#include <Nirvana/Shell.h>
 #include "UserObject.h"
 #include "UserAllocator.h"
 
@@ -41,18 +41,18 @@ namespace Core {
 /// Context for the POSIX file descriptor operations.
 class FileDescriptorsContext
 {
-	static const unsigned POSIX_CHANGEABLE_FLAGS = O_APPEND | O_NONBLOCK;
+	static const unsigned POSIX_CHANGEABLE_FLAGS = O_SYNC | O_APPEND | O_NONBLOCK;
 	static const TimeBase::TimeT SETLOCK_WAIT_TIMEOUT = std::numeric_limits<TimeBase::TimeT>::max ();
 
 public:
 	FileDescriptorsContext ()
 	{}
 
-	unsigned fd_add (Access::_ref_type&& access, unsigned flags = 0, FileSize pos = 0)
+	unsigned fd_add (Access::_ref_type&& access, FileSize pos = 0)
 	{
 		// Allocate file descriptor cell
 		size_t i = alloc_fd ();
-		file_descriptors_ [i].attach (make_fd (std::move (access), flags, pos));
+		file_descriptors_ [i].attach (make_fd (std::move (access), pos));
 
 		return (unsigned)(i + STD_CNT);
 	}
@@ -147,8 +147,8 @@ public:
 		get_open_fd (ifd).ref ()->stat (fs);
 	}
 
-	void set_inherited_files (const FileDescriptors& files);
-	FileDescriptors get_inherited_files (unsigned* std_mask) const;
+	void set_spawn_files (const IDL::Sequence <SpawnFD>& files);
+	void get_spawn_files (IDL::Sequence <SpawnFD>& files) const;
 
 private:
 	class NIRVANA_NOVTABLE Descriptor : public UserObject
@@ -165,7 +165,7 @@ private:
 		virtual void flags (unsigned fl) = 0;
 		virtual void flush () = 0;
 		virtual bool isatty () const = 0;
-		virtual void get_file_descr (FileDescr& fd) const;
+		virtual void get_spawn_fd (SpawnFD& fd) const;
 		virtual bool lock (const struct flock& lk, TimeBase::TimeT timeout) const = 0;
 		virtual void get_lock (struct flock& lk) const = 0;
 
@@ -271,7 +271,7 @@ private:
 	class DescriptorDirect;
 
 private:
-	static DescriptorRef make_fd (Access::_ref_type&& access, unsigned flags, FileSize pos);
+	static DescriptorRef make_fd (Access::_ref_type&& access, FileSize pos);
 	
 	DescriptorInfo& get_fd (unsigned fd);
 	

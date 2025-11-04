@@ -37,7 +37,7 @@ class Static_pacman :
 	public CORBA::servant_traits <Nirvana::Cmdlet>::ServantStatic <Static_pacman>
 {
 public:
-	static int run (StringSeq& argv)
+	static int run (const StringSeq& argv)
 	{
 		static const char usage [] = "Usage: pacman <command> [parameters]";
 		if (argv.size () <= 1) {

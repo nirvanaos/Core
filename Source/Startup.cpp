@@ -25,13 +25,9 @@
 */
 
 #include "Startup.h"
-#include <CORBA/Server.h>
 #include "ExecDomain.h"
-#include "ProtDomain.h"
 #include "initterm.h"
-#include <Nirvana/Shell_s.h>
-#include <NameService/FileSystem.h>
-#include "open_binary.h"
+#include <Nirvana/Shell.h>
 
 namespace Nirvana {
 namespace Core {
@@ -72,23 +68,15 @@ void Startup::run_command ()
 			argv.emplace_back (*arg);
 		}
 
-		FileDescriptors files = MemContext::current ().get_inherited_files (6);
+		SpawnFiles files;
+		the_shell->get_spawn_files (files);
+		files.work_dir ("/sbin");
 
-		if (cmdlet) {
-			ret_ = (int)the_shell->cmdlet (argv, "/sbin", files);
-		} else {
+		if (cmdlet)
+			ret_ = the_shell->cmdlet (argv, files);
+		else
+			ret_ = the_shell->spawn (argv, files);
 
-			IDL::String exe_path = argv [0];
-			IDL::String translated;
-			if (FileSystem::translate_path (exe_path, translated))
-				exe_path = std::move (translated);
-
-			if (!FileSystem::is_absolute (exe_path))
-				exe_path = ProtDomain::binary_dir () + '/' + exe_path;
-			AccessDirect::_ref_type binary = open_binary (exe_path);
-
-			ret_ = (int)the_shell->process (binary, argv, "/sbin", files);
-		}
 		Scheduler::shutdown (0);
 	}
 }

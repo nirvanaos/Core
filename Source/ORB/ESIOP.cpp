@@ -326,7 +326,7 @@ private:
 	virtual void run () noexcept override;
 
 private:
-	Security::Context security_context_;
+	Nirvana::Core::Security::Context security_context_;
 };
 
 void ReceiveShutdownSys::run () noexcept
@@ -412,7 +412,7 @@ void dispatch_message (MessageHeader& message) noexcept
 
 		case MessageType::SHUTDOWN: {
 			const auto& msg = Shutdown::receive (message);
-			if (!Security::is_valid_context (msg.security_context))
+			if (!Nirvana::Core::Security::is_valid_context (msg.security_context))
 				break;
 			if (is_system_domain ()) {
 				try {
@@ -420,7 +420,7 @@ void dispatch_message (MessageHeader& message) noexcept
 				} catch (...) {
 				}
 			} else {
-				Security::Context tmp (msg.security_context);
+				Nirvana::Core::Security::Context tmp (msg.security_context);
 				Scheduler::shutdown (msg.flags ());
 			}
 		} break;

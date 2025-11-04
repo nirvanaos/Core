@@ -39,7 +39,7 @@ public:
 	static CosNaming::Name current_dir ()
 	{
 		CosNaming::Name dir;
-		MemContext* mc = MemContext::current_ptr ();
+		const MemContext* mc = MemContext::current_ptr ();
 		if (mc) {
 			const CurrentDirContext* ctx = mc->current_dir_ptr ();
 			if (ctx) {

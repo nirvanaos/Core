@@ -28,6 +28,7 @@
 #define NIRVANA_CORE_COREDOMAINS_IDL_
 
 #include "Nirvana/Domains.idl"
+#include "Nirvana/Shell.idl"
 
 module Nirvana {
 
@@ -57,6 +58,9 @@ interface ProtDomainCore : ProtDomain
 		raises (BindError::Error);
 
 	void get_module_bindings (in AccessDirect file, out PM::ModuleBindings bindings)
+		raises (BindError::Error);
+
+	long spawn (in AccessDirect file, in StringSeq argv, in SpawnFiles files)
 		raises (BindError::Error);
 };
 

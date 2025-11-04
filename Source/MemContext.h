@@ -111,7 +111,7 @@ public:
 		return *heap_;
 	}
 
-	const RuntimeSupportContext* runtime_support_ptr () noexcept
+	const RuntimeSupportContext* runtime_support_ptr () const noexcept
 	{
 		return data_holder_.runtime_support_ptr ();
 	}
@@ -121,7 +121,7 @@ public:
 		return data_holder_.runtime_support ();
 	}
 
-	DeadlinePolicyContext* deadline_policy_ptr () noexcept
+	DeadlinePolicyContext* deadline_policy_ptr () const noexcept
 	{
 		return data_holder_.deadline_policy_ptr ();
 	}
@@ -141,7 +141,7 @@ public:
 		return data_holder_.tls ();
 	}
 
-	FileDescriptorsContext* file_descriptors_ptr () noexcept
+	FileDescriptorsContext* file_descriptors_ptr () const noexcept
 	{
 		return data_holder_.file_descriptors_ptr ();
 	}
@@ -151,7 +151,7 @@ public:
 		return data_holder_.file_descriptors ();
 	}
 
-	CurrentDirContext* current_dir_ptr () noexcept
+	CurrentDirContext* current_dir_ptr () const noexcept
 	{
 		return data_holder_.current_dir_ptr ();
 	}
@@ -161,12 +161,13 @@ public:
 		return data_holder_.current_dir ();
 	}
 
-	bool core_context () noexcept
+	bool core_context () const noexcept
 	{
 		return core_context_;
 	}
 
-	FileDescriptors get_inherited_files (unsigned create_std_mask);
+	void get_spawn_files (SpawnFiles& files) const;
+	void set_spawn_files (const SpawnFiles& files);
 
 	CORBA::Core::ValueList& value_list () noexcept
 	{

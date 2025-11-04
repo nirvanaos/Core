@@ -82,6 +82,5 @@ CosNaming::NamingContext::_ref_type CurrentDirContext::name_service ()
 	return CosNaming::NamingContext::_narrow (CORBA::Core::Services::bind (CORBA::Core::Services::NameService));
 }
 
-
 }
 }

@@ -37,9 +37,7 @@ namespace Nirvana {
 namespace Core {
 
 class Heap;
-class ExecDomain;
 class SyncDomain;
-class MemContext;
 class Module;
 
 /// Synchronization context pure interface.

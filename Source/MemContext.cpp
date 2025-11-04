@@ -26,11 +26,10 @@
 #include "MemContext.h"
 #include "ExecDomain.h"
 #include "BinderMemory.h"
-#include "Chrono.h"
 #include "HeapDynamic.h"
-#include "ORB/Services.h"
 #include "ORB/RefCnt.h"
 #include <Port/config.h>
+#include "NameService/NameService.h"
 
 namespace Nirvana {
 namespace Core {
@@ -201,34 +200,21 @@ void MemContext::destroy (ExecDomain& cur_ed) noexcept
 	heap->release (this, sizeof (MemContext));
 }
 
-FileDescriptors MemContext::get_inherited_files (unsigned create_std_mask)
+void MemContext::get_spawn_files (SpawnFiles& files) const
 {
-	FileDescriptors files;
 	const FileDescriptorsContext* fdc = file_descriptors_ptr ();
-	if (fdc) {
-		unsigned std_mask;
-		files = fdc->get_inherited_files (&std_mask);
-		create_std_mask &= ~std_mask;
-	}
+	if (fdc)
+		fdc->get_spawn_files (files.files ());
+	const CurrentDirContext* cwd = current_dir_ptr ();
+	if (cwd)
+		files.work_dir (CosNaming::Core::NameService::to_string_unchecked (cwd->current_dir ()));
+}
 
-	if (create_std_mask) {
-
-		Nirvana::File::_ref_type console = Nirvana::File::_narrow (
-			CORBA::Core::Services::bind (CORBA::Core::Services::Console));
-		assert (console);
-		FileDescr fd;
-		fd.access (console->open (
-			((create_std_mask & 1) ? O_RDWR : O_WRONLY) | O_TEXT, 0));
-
-		for (unsigned i = 0, mask = 1; i < 3; mask <<= 1, ++i) {
-			if (mask & create_std_mask) {
-				fd.descriptors ().push_back (i);
-			}
-		}
-		files.push_back (std::move (fd));
-	}
-
-	return files;
+void MemContext::set_spawn_files (const SpawnFiles& files)
+{
+	file_descriptors ().set_spawn_files (files.files ());
+	if (!files.work_dir ().empty ())
+		current_dir ().chdir (files.work_dir ());
 }
 
 }

@@ -71,9 +71,23 @@ public:
 		return Binder::load_and_bind <CORBA::Object> (mod_id, file, name);
 	}
 
-	static void get_module_bindings (Nirvana::AccessDirect::_ptr_type binary, PM::ModuleBindings& bindings)
+	static void get_module_bindings (Nirvana::AccessDirect::_ptr_type binary,
+		PM::ModuleBindings& bindings)
 	{
 		Binder::get_module_bindings (binary, bindings);
+	}
+
+	static int spawn (AccessDirect::_ptr_type file, StringSeq& argv, const SpawnFiles& files)
+	{
+		Core::Executable executable (file);
+
+		int ret = -1;
+		SYNC_BEGIN (executable, &Core::Heap::user_heap ());
+		Core::MemContext::current ().set_spawn_files (files);
+		ret = executable.main (argv);
+		SYNC_END ();
+
+		return ret;
 	}
 
 	static IDL::String binary_dir ();

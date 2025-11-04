@@ -72,12 +72,6 @@ public:
 		return _this ();
 	}
 
-	static Nirvana::ProtDomain::_ref_type prot_domain ()
-	{
-		return Nirvana::ProtDomain::_narrow (
-			CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain));
-	}
-
 	void get_binding (const IDL::String& name, unsigned platform, Binding& binding) const
 	{
 		if (get_sys_binding (name, platform, binding))
@@ -105,25 +99,6 @@ public:
 		return manager_;
 	}
 
-	int32_t exec (const IDL::String& path, const StringSeq& argv, const IDL::String& work_dir,
-		const FileDescriptors& files)
-	{
-		AccessDirect::_ref_type binary = open_binary (path);
-		PlatformId platform = Binary::get_platform (binary);
-		if (!Binary::is_supported_platform (platform))
-			BindError::throw_unsupported_platform (platform);
-
-		if (SINGLE_DOMAIN)
-			return the_shell->process (binary, argv, work_dir, files);
-		else {
-			Nirvana::ProtDomain::_ref_type domain = manager_->create_prot_domain (platform);
-			Nirvana::Shell::_ref_type shell = Nirvana::Shell::_narrow (domain->bind ("Nirvana/the_shell"));
-			int32_t ret = shell->process (binary, argv, work_dir, files);
-			domain->shutdown (0);
-			return ret;
-		}
-	}
-
 	PlatformId get_module_bindings (const IDL::String& path, PM::ModuleBindings& bindings)
 	{
 		AccessDirect::_ref_type binary = open_binary (path);
@@ -133,9 +108,9 @@ public:
 			Nirvana::BindError::throw_unsupported_platform (platform);
 
 		if (SINGLE_DOMAIN) {
-
-			ProtDomainCore::_narrow (prot_domain ())->get_module_bindings (binary, bindings);
-
+			Nirvana::ProtDomainCore::_narrow (
+				CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain))
+				->get_module_bindings (binary, bindings);
 		} else {
 
 			ProtDomainCore::_ref_type domain = ProtDomainCore::_narrow (
@@ -152,6 +127,12 @@ public:
 		}
 
 		return platform;
+	}
+
+	static Nirvana::ProtDomain::_ref_type prot_domain ()
+	{
+		return Nirvana::ProtDomain::_narrow (
+			CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain));
 	}
 
 	CORBA::Object::_ref_type get_service (const IDL::String& id)

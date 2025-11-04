@@ -60,7 +60,7 @@ NIRVANA_EXPORT_FACTORY (_exp_Nirvana_AccessBuf, Nirvana::AccessBuf)
 NIRVANA_EXPORT_FACTORY (_exp_Messaging_ExceptionHolder, Messaging::ExceptionHolder)
 NIRVANA_EXPORT_FACTORY (_exp_Components_Cookie, Components::Cookie)
 
-NIRVANA_EXPORT_OBJECT (_exp_Nirvana_the_shell, Nirvana::Static_the_shell)
+NIRVANA_EXPORT_STATIC (_exp_Nirvana_the_shell, "Nirvana/the_shell", Nirvana::Static_the_shell)
 
 NIRVANA_EXPORT_PSEUDO (_exp_CORBA_Internal_object_factory, CORBA::Internal::Static_object_factory)
 NIRVANA_EXPORT_PSEUDO (_exp_CORBA_the_orb, CORBA::Static_the_orb)

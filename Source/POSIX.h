@@ -142,7 +142,7 @@ public:
 		Nirvana::Dir::_ref_type root = Nirvana::Dir::_narrow (name_service ()->resolve (CosNaming::Name ()));
 		// Open file
 		Nirvana::Access::_ref_type access = root->open (name, oflag, mode);
-		return Core::FileDescriptors::fd_add (std::move (access), oflag);
+		return Core::FileDescriptors::fd_add (std::move (access));
 	}
 
 	static FilDesc mkostemps (CharPtr tpl, unsigned suffix_len, unsigned flags)
@@ -160,11 +160,10 @@ public:
 			file = CosNaming::Core::NameService::to_string_unchecked (file_name);
 		}
 
-		Nirvana::AccessBuf::_ref_type access = Nirvana::AccessBuf::_downcast (
-			Nirvana::Dir::_narrow (name_service ()->resolve (dir_name))->
-			mkostemps (file, (uint16_t)suffix_len, (uint16_t)flags, 0)->_to_value ());
+		Nirvana::Access::_ref_type access = Nirvana::Dir::_narrow (name_service ()->resolve (dir_name))->
+			mkostemps (file, (uint16_t)suffix_len, (uint16_t)flags, 0);
 
-		unsigned fd = Core::FileDescriptors::fd_add (std::move (access), flags);
+		unsigned fd = Core::FileDescriptors::fd_add (std::move (access));
 		size_t src_end = file.size () - suffix_len;
 		size_t src_begin = src_end - 6;
 		const char* src = file.c_str ();

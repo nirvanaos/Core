@@ -41,24 +41,7 @@ class Static_the_shell :
 	public CORBA::servant_traits <Shell>::ServantStatic <Static_the_shell>
 {
 public:
-	static int process (AccessDirect::_ptr_type file,
-		StringSeq& argv, IDL::String& work_dir, FileDescriptors& files)
-	{
-		Core::Executable executable (file);
-
-		int ret = -1;
-		SYNC_BEGIN (executable, &Core::Heap::user_heap ());
-		Core::MemContext& mc = Core::MemContext::current ();
-		mc.file_descriptors ().set_inherited_files (files);
-		if (!work_dir.empty ())
-			mc.current_dir ().chdir (work_dir);
-		ret = executable.main (argv);
-		SYNC_END ();
-
-		return ret;
-	}
-
-	static int cmdlet (StringSeq& argv, IDL::String& work_dir, FileDescriptors& files)
+	static int cmdlet (const StringSeq& argv, const SpawnFiles& files)
 	{
 		if (argv.empty ())
 			throw_BAD_PARAM ();
@@ -66,14 +49,35 @@ public:
 
 		int ret = -1;
 		SYNC_BEGIN (*cmdlet.sync_context, &Core::Heap::user_heap ());
-		Core::MemContext& mc = Core::MemContext::current ();
-		mc.file_descriptors ().set_inherited_files (files);
-		if (!work_dir.empty ())
-			mc.current_dir ().chdir (work_dir);
+		Core::MemContext::current ().set_spawn_files (files);
 		ret = cmdlet.itf.template downcast <Cmdlet> ()->run (argv);
 		SYNC_END ();
 
 		return ret;
+	}
+
+	static int spawn (const StringSeq& argv, const SpawnFiles& files)
+	{
+		if (argv.empty ())
+			throw_BAD_PARAM ();
+		AccessDirect::_ref_type binary = open_binary (argv [0]);
+		PlatformId platform = get_binary_platform (binary);
+		if (!Core::Binary::is_supported_platform (platform))
+			BindError::throw_unsupported_platform (platform);
+
+		int32_t ret;
+		if (Core::SINGLE_DOMAIN || PLATFORM == platform) {
+			ret = (int)Nirvana::ProtDomainCore::_narrow (
+				CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain))
+				->spawn (binary, argv, files);
+		} else {
+			Nirvana::ProtDomainCore::_ref_type domain = ProtDomainCore::_narrow (
+				Nirvana::SysDomain::_narrow (CORBA::Core::Services::bind (CORBA::Core::Services::SysDomain))
+				->provide_manager ()->create_prot_domain (platform));
+			ret = domain->spawn (binary, argv, files);
+			domain->shutdown (0);
+		}
+		return (int)ret;
 	}
 
 	static void create_pipe (AccessChar::_ref_type& pipe_out, AccessChar::_ref_type& pipe_in)
@@ -81,9 +85,9 @@ public:
 		throw_NO_IMPLEMENT ();
 	}
 
-	static FileDescriptors get_inherited_files (unsigned std_creation_mask)
+	static void get_spawn_files (SpawnFiles& files)
 	{
-		return Core::MemContext::current ().get_inherited_files (std_creation_mask);
+		return Core::MemContext::current ().get_spawn_files (files);
 	}
 
 	static AccessDirect::_ref_type open_binary (const IDL::String& path)

@@ -27,12 +27,13 @@
 #include "MapUnorderedUnstable.h"
 #include "virtual_copy.h"
 #include <Nirvana/posix_defs.h>
+#include "ORB/Services.h"
 #include <queue>
 
 namespace Nirvana {
 namespace Core {
 
-void FileDescriptorsContext::Descriptor::get_file_descr (FileDescr& fd) const
+void FileDescriptorsContext::Descriptor::get_spawn_fd (SpawnFD& fd) const
 {
 	fd.access (access_base_->dup (0, 0));
 }
@@ -119,10 +120,9 @@ private:
 class FileDescriptorsContext::DescriptorDirect : public DescriptorBase
 {
 public:
-	DescriptorDirect (Access::_ref_type&& base, AccessDirect::_ref_type&& access, unsigned flags, FileSize pos) :
+	DescriptorDirect (Access::_ref_type&& base, AccessDirect::_ref_type&& access, FileSize pos) :
 		DescriptorBase (std::move (base)),
 		access_ (std::move (access)),
-		flags_ (flags),
 		pos_ (pos)
 	{}
 
@@ -135,7 +135,7 @@ public:
 	virtual bool isatty () const override;
 	virtual bool lock (const struct flock& lk, TimeBase::TimeT timeout) const override;
 	virtual void get_lock (struct flock& lk) const override;
-	virtual void get_file_descr (FileDescr& fd) const override;
+	virtual void get_spawn_fd (SpawnFD& fd) const override;
 
 private:
 	FileSize calc_pos (unsigned method, FileOff off) const;
@@ -143,14 +143,12 @@ private:
 
 private:
 	const AccessDirect::_ref_type access_;
-	unsigned flags_;
 	FileSize pos_;
 };
 
-void FileDescriptorsContext::DescriptorDirect::get_file_descr (FileDescr& fd) const
+void FileDescriptorsContext::DescriptorDirect::get_spawn_fd (SpawnFD& fd) const
 {
-	Descriptor::get_file_descr (fd);
-	fd.flags (flags_);
+	Descriptor::get_spawn_fd (fd);
 	fd.pos (pos_);
 }
 
@@ -178,8 +176,18 @@ size_t FileDescriptorsContext::alloc_fd (unsigned start)
 
 FileDescriptorsContext::DescriptorInfo& FileDescriptorsContext::get_fd (unsigned ifd)
 {
-	if (ifd < StandardFileDescriptor::STD_CNT)
-		return std_file_descriptors_ [ifd];
+	if (ifd < StandardFileDescriptor::STD_CNT) {
+		DescriptorInfo& desc = std_file_descriptors_ [ifd];
+		if (desc.closed ()) {
+			Nirvana::File::_ref_type console = Nirvana::File::_narrow (
+				CORBA::Core::Services::bind (CORBA::Core::Services::Console));
+			assert (console);
+			desc.attach (make_fd (console->open (((ifd == 0) ? O_RDONLY : O_WRONLY) | O_TEXT, 0), 0));
+		}
+
+		return desc;
+	}
+
 	ifd -= StandardFileDescriptor::STD_CNT;
 	if (ifd >= file_descriptors_.size ())
 		throw_BAD_PARAM (make_minor_errno (EBADF));
@@ -195,7 +203,7 @@ FileDescriptorsContext::DescriptorInfo& FileDescriptorsContext::get_open_fd (uns
 }
 
 FileDescriptorsContext::DescriptorRef FileDescriptorsContext::make_fd (
-	Access::_ref_type&& access, unsigned flags, FileSize pos)
+	Access::_ref_type&& access, FileSize pos)
 {
 	CORBA::AbstractBase::_ptr_type base = access;
 	CORBA::ValueBase::_ref_type val = base->_to_value ();
@@ -211,12 +219,12 @@ FileDescriptorsContext::DescriptorRef FileDescriptorsContext::make_fd (
 			return CORBA::make_reference <DescriptorChar> (std::move (access), std::move (ac));
 		AccessDirect::_ref_type ad = AccessDirect::_narrow (obj);
 		if (ad)
-			return CORBA::make_reference <DescriptorDirect> (std::move (access), std::move (ad), flags, pos);
+			return CORBA::make_reference <DescriptorDirect> (std::move (access), std::move (ad), pos);
 	}
 	throw_UNKNOWN (make_minor_errno (EIO));
 }
 
-void FileDescriptorsContext::set_inherited_files (const FileDescriptors& files)
+void FileDescriptorsContext::set_spawn_files (const IDL::Sequence <SpawnFD>& files)
 {
 	size_t max = 0;
 	for (const auto& f : files) {
@@ -231,7 +239,7 @@ void FileDescriptorsContext::set_inherited_files (const FileDescriptors& files)
 		file_descriptors_.resize (max + 1 - StandardFileDescriptor::STD_CNT);
 	}
 	for (const auto& f : files) {
-		DescriptorRef fd = make_fd (std::move (f.access ()), f.flags (), f.pos ());
+		DescriptorRef fd = make_fd (f.access (), f.pos ());
 		fd->remove_descriptor_ref ();
 		for (auto d : f.descriptors ()) {
 			DescriptorInfo& fdr = get_fd ((unsigned)d);
@@ -242,34 +250,25 @@ void FileDescriptorsContext::set_inherited_files (const FileDescriptors& files)
 	}
 }
 
-FileDescriptors FileDescriptorsContext::get_inherited_files (unsigned* std_mask) const
+void FileDescriptorsContext::get_spawn_files (IDL::Sequence <SpawnFD>& files) const
 {
-	using Inherited = MapUnorderedUnstable <Descriptor*, IDL::Sequence <int>,
+	using FileMap = MapUnorderedUnstable <Descriptor*, IDL::Sequence <int>,
 		std::hash <Descriptor*>, std::equal_to <Descriptor*>, UserAllocator>;
 
-	Inherited inherited;
-	unsigned std = 0;
+	FileMap file_map;
 	for (unsigned ifd = 0, end = StandardFileDescriptor::STD_CNT + file_descriptors_.size (); ifd < end; ++ifd) {
 		const DescriptorInfo& d = get_fd (ifd);
 		if (!d.closed () && !(d.fd_flags () & FD_CLOEXEC)) {
-			inherited [d.ptr ()].push_back (ifd);
-			if (ifd < StandardFileDescriptor::STD_CNT)
-				std |= 1 << ifd;
+			file_map [d.ptr ()].push_back (ifd);
 		}
 	}
 
-	FileDescriptors files;
-	for (auto& f : inherited) {
-		FileDescr fd;
-		f.first->get_file_descr (fd);
+	for (auto& f : file_map) {
+		SpawnFD fd;
+		f.first->get_spawn_fd (fd);
 		fd.descriptors (std::move (f.second));
 		files.push_back (std::move (fd));
 	}
-
-	if (std_mask)
-		*std_mask = std;
-
-	return files;
 }
 
 size_t FileDescriptorsContext::DescriptorBuf::read (void* p, size_t size)
@@ -325,9 +324,6 @@ size_t FileDescriptorsContext::DescriptorChar::read (void* p, size_t size)
 
 size_t FileDescriptorsContext::DescriptorDirect::read (void* p, size_t size)
 {
-	if ((flags_ & O_ACCMODE) == O_WRONLY)
-		throw_NO_PERMISSION (make_minor_errno (EBADF));
-
 	if (!size)
 		return 0;
 
@@ -367,9 +363,6 @@ void FileDescriptorsContext::DescriptorChar::write (const void* p, size_t size)
 
 void FileDescriptorsContext::DescriptorDirect::write (const void* p, size_t size)
 {
-	if ((flags_ & O_ACCMODE) == O_RDONLY)
-		throw_NO_PERMISSION (make_minor_errno (EBADF));
-
 	if (!size)
 		return;
 
@@ -381,7 +374,7 @@ void FileDescriptorsContext::DescriptorDirect::write (const void* p, size_t size
 	Bytes data ((const uint8_t*)p, (const uint8_t*)p + size);
 	pos_ = next;
 	try {
-		access_->write (pos, data, flags_ & O_SYNC);
+		access_->write (pos, data, false);
 	} catch (...) {
 		pos_ = pos;
 		throw;

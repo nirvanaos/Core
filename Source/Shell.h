@@ -34,6 +34,8 @@
 #include "Executable.h"
 #include "Binder.h"
 #include "open_binary.h"
+#include "NameService/NameService.h"
+#include "NameService/FileSystem.h"
 
 namespace Nirvana {
 
@@ -58,9 +60,18 @@ public:
 
 	static int spawn (const StringSeq& argv, const SpawnFiles& files)
 	{
-		if (argv.empty ())
+		if (argv.empty () || argv.front ().empty ())
 			throw_BAD_PARAM ();
-		AccessDirect::_ref_type binary = open_binary (argv [0]);
+
+		AccessDirect::_ref_type binary;
+		{
+			CosNaming::Name name;
+			const IDL::String& exe = argv.front ();
+			if (!Core::FileSystem::is_absolute (exe) && !files.work_dir ().empty ())
+				name = CosNaming::Core::NameService::to_name (files.work_dir ());
+			Core::FileSystem::append_path (name, exe);
+			binary = Core::open_binary (CosNaming::Core::NameService::to_string (name));
+		}
 		PlatformId platform = get_binary_platform (binary);
 		if (!Core::Binary::is_supported_platform (platform))
 			BindError::throw_unsupported_platform (platform);
@@ -88,11 +99,6 @@ public:
 	static void get_spawn_files (SpawnFiles& files)
 	{
 		return Core::MemContext::current ().get_spawn_files (files);
-	}
-
-	static AccessDirect::_ref_type open_binary (const IDL::String& path)
-	{
-		return Core::open_binary (path);
 	}
 
 	static PlatformId get_binary_platform (AccessDirect::_ptr_type binary)

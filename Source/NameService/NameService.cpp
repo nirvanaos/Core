@@ -95,8 +95,7 @@ Object::_ref_type NameService::resolve1 (Name& n)
 				throw;
 			}
 			wait_list->finish_construction (ret);
-		} else
-			ret = file_system_.get ();
+		}
 	} else
 		ret = Base::resolve1 (n);
 

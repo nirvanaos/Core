@@ -132,6 +132,7 @@ void ServantProxyBase::run_garbage_collector () const noexcept
 			return;
 		} catch (...) {
 			// Async call failed, maybe resources are exausted.
+			assert (false);
 			// Fallback to collect garbage synchronous.
 		}
 	}

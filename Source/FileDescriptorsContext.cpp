@@ -176,17 +176,8 @@ size_t FileDescriptorsContext::alloc_fd (unsigned start)
 
 FileDescriptorsContext::DescriptorInfo& FileDescriptorsContext::get_fd (unsigned ifd)
 {
-	if (ifd < StandardFileDescriptor::STD_CNT) {
-		DescriptorInfo& desc = std_file_descriptors_ [ifd];
-		if (desc.closed ()) {
-			Nirvana::File::_ref_type console = Nirvana::File::_narrow (
-				CORBA::Core::Services::bind (CORBA::Core::Services::Console));
-			assert (console);
-			desc.attach (make_fd (console->open (((ifd == 0) ? O_RDONLY : O_WRONLY) | O_TEXT, 0), 0));
-		}
-
-		return desc;
-	}
+	if (ifd < StandardFileDescriptor::STD_CNT)
+		return std_file_descriptors_ [ifd];
 
 	ifd -= StandardFileDescriptor::STD_CNT;
 	if (ifd >= file_descriptors_.size ())
@@ -197,8 +188,20 @@ FileDescriptorsContext::DescriptorInfo& FileDescriptorsContext::get_fd (unsigned
 FileDescriptorsContext::DescriptorInfo& FileDescriptorsContext::get_open_fd (unsigned ifd)
 {
 	DescriptorInfo& fd = get_fd (ifd);
-	if (fd.closed ())
-		throw_BAD_PARAM (make_minor_errno (EBADF));
+	if (fd.closed ()) {
+		if (ifd < StandardFileDescriptor::STD_CNT) {
+			Nirvana::File::_ref_type console = Nirvana::File::_narrow (
+				CORBA::Core::Services::bind (CORBA::Core::Services::Console));
+			assert (console);
+			fd.attach (make_fd (console->open (((ifd == 0) ? O_RDONLY : O_WRONLY) | O_TEXT, 0), 0));
+			if (StandardFileDescriptor::STD_OUT == ifd) {
+				DescriptorInfo& err = std_file_descriptors_ [StandardFileDescriptor::STD_ERR];
+				if (err.closed ())
+					err.dup (fd);
+			}
+		} else
+			throw_BAD_PARAM (make_minor_errno (EBADF));
+	}
 	return fd;
 }
 

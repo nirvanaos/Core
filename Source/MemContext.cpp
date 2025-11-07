@@ -212,7 +212,8 @@ void MemContext::get_spawn_files (SpawnFiles& files) const
 
 void MemContext::set_spawn_files (const SpawnFiles& files)
 {
-	file_descriptors ().set_spawn_files (files.files ());
+	if (!files.files ().empty ())
+		file_descriptors ().set_spawn_files (files.files ());
 	if (!files.work_dir ().empty ())
 		current_dir ().chdir (files.work_dir ());
 }

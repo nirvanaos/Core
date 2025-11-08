@@ -47,11 +47,12 @@
 #include "TimerAsyncCall.h"
 #include "SystemInfo.h"
 #include "BinaryMap.h"
-#include "Executable.h"
 #include "call_with_user_exceptions.h"
 
 namespace Nirvana {
 namespace Core {
+
+class Executable;
 
 /// @brief This large complex object is cantral part of the Nirvana Core.
 /// It binds core objects with each other, loads modules, keeps remote references etc.
@@ -121,50 +122,13 @@ public:
 	/// 
 	/// \param exe Executable object.
 	/// \returns The Main interface pointer.
-	inline static Main::_ptr_type bind (Executable& exe)
-	{
-		// Find module entry point
-		const ProcessStartup* startup_entry = nullptr;
-		const Section& metadata = exe.metadata ();
-		for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
-			if (!it.valid ())
-				BindError::throw_invalid_metadata ();
-			if (OLF_PROCESS_STARTUP == *it.cur ()) {
-				if (startup_entry)
-					BindError::throw_message ("Duplicated OLF_PROCESS_STARTUP entry");
-				startup_entry = reinterpret_cast <const ProcessStartup*> (it.cur ());
-			}
-		}
-
-		if (!startup_entry)
-			BindError::throw_message ("OLF_PROCESS_STARTUP not found");
-
-		Main::_ptr_type startup = Main::_check (startup_entry->startup);
-
-		call_with_user_exceptions (singleton_->sync_domain_, nullptr, [&exe]() {
-			singleton_->module_bind (exe._get_ptr (), exe.metadata (), nullptr);
-			try {
-				singleton_->binary_map_.add (exe);
-			} catch (...) {
-				release_imports (exe._get_ptr (), exe.metadata ());
-				throw;
-			}
-			});
-
-		return startup;
-	}
+	static Main::_ptr_type bind (Executable& exe);
 
 	/// \brief Unbind executable.
 	/// 
 	/// \param mod The Nirvana::Module interface.
 	/// \param metadata Module metadata.
-	inline static void unbind (Executable& mod) noexcept
-	{
-		SYNC_BEGIN (singleton_->sync_domain_, nullptr);
-		singleton_->binary_map_.remove (mod);
-		SYNC_END ();
-		release_imports (mod._get_ptr (), mod.metadata ());
-	}
+	static void unbind (Executable& mod) noexcept;
 
 	/// Unmarshal remote reference.
 	/// 

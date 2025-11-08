@@ -31,6 +31,7 @@
 #include <CORBA/Server.h>
 #include "SyncContext.h"
 #include "Binary.h"
+#include "Binder.h"
 #include <Nirvana/Module_s.h>
 #include <Nirvana/Main.h>
 #include "ORB/LifeCycleStack.h"
@@ -46,8 +47,16 @@ class Executable :
 	public CORBA::Core::LifeCycleStack
 {
 public:
-	Executable (AccessDirect::_ptr_type file);
-	~Executable ();
+	Executable (AccessDirect::_ptr_type file) :
+		Binary (file),
+		ImplStatic <SyncContext> (false),
+		entry_point_ (Binder::bind (*this))
+	{}
+
+	~Executable ()
+	{
+		Binder::unbind (*this);
+	}
 
 	int main (Main::Strings& argv)
 	{
@@ -77,6 +86,47 @@ private:
 	Main::_ptr_type entry_point_;
 	AtExitSync <UserAllocator> at_exit_;
 };
+
+inline Main::_ptr_type Binder::bind (Executable& exe)
+{
+	// Find module entry point
+	const ProcessStartup* startup_entry = nullptr;
+	const Section& metadata = exe.metadata ();
+	for (OLF_Iterator <> it (metadata.address, metadata.size); !it.end (); it.next ()) {
+		if (!it.valid ())
+			BindError::throw_invalid_metadata ();
+		if (OLF_PROCESS_STARTUP == *it.cur ()) {
+			if (startup_entry)
+				BindError::throw_message ("Duplicated OLF_PROCESS_STARTUP entry");
+			startup_entry = reinterpret_cast <const ProcessStartup*> (it.cur ());
+		}
+	}
+
+	if (!startup_entry)
+		BindError::throw_message ("OLF_PROCESS_STARTUP not found");
+
+	Main::_ptr_type startup = Main::_check (startup_entry->startup);
+
+	call_with_user_exceptions (singleton_->sync_domain_, nullptr, [&exe]() {
+		singleton_->module_bind (exe._get_ptr (), exe.metadata (), nullptr);
+		try {
+			singleton_->binary_map_.add (exe);
+		} catch (...) {
+			release_imports (exe._get_ptr (), exe.metadata ());
+			throw;
+		}
+		});
+
+	return startup;
+}
+
+inline void Binder::unbind (Executable& mod) noexcept
+{
+	SYNC_BEGIN (singleton_->sync_domain_, nullptr);
+	singleton_->binary_map_.remove (mod);
+	SYNC_END ();
+	release_imports (mod._get_ptr (), mod.metadata ());
+}
 
 }
 }

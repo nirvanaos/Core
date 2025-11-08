@@ -40,6 +40,7 @@
 #include "NameService/FileSystem.h"
 #include "open_binary.h"
 #include "Binary.h"
+#include "ProtDomain.h"
 #include "PacMan/PacFactory.h"
 
 namespace Nirvana {
@@ -108,9 +109,11 @@ public:
 			Nirvana::BindError::throw_unsupported_platform (platform);
 
 		if (SINGLE_DOMAIN) {
-			Nirvana::ProtDomainCore::_narrow (
-				CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain))
-				->get_module_bindings (binary, bindings);
+			ProtDomainCore::_ref_type domain = Nirvana::ProtDomainCore::_narrow (
+				CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain));
+			if (!domain)
+				throw_INITIALIZE ();
+			domain->get_module_bindings (binary, bindings);
 		} else {
 
 			ProtDomainCore::_ref_type domain = ProtDomainCore::_narrow (

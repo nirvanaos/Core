@@ -60,7 +60,7 @@ interface ProtDomainCore : ProtDomain
 	void get_module_bindings (in AccessDirect file, out PM::ModuleBindings bindings)
 		raises (BindError::Error);
 
-	long spawn (in AccessDirect file, in StringSeq argv, in SpawnFiles files)
+	Process spawn (in AccessDirect file, in StringSeq argv, in SpawnFiles files)
 		raises (BindError::Error);
 };
 

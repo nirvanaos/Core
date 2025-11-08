@@ -44,6 +44,7 @@ namespace Nirvana {
 namespace Core {
 
 class ThreadBackground;
+class ProcessImpl;
 
 /// Core TLS indexes.
 enum CoreTLS
@@ -106,16 +107,8 @@ public:
 
 	/// Start process.
 	/// 
-	/// \param runnable The Runnable object to execute.
-	/// \param target   Target Synchronization context.
-	/// \param mem_context Memory context.
-	static void start_process (Runnable& runnable,
-		SyncContext& target, Ref <MemContext>&& mem_context)
-	{
-		Ref <ExecDomain> exec_domain = create (INFINITE_DEADLINE, std::move (mem_context));
-		exec_domain->runnable_ = &runnable;
-		exec_domain->spawn (target);
-	}
+	/// \param process The ProcessImpl object.
+	static void start_process (ProcessImpl& process);
 
 	const DeadlineTime& deadline () const noexcept
 	{

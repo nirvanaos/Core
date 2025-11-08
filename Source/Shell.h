@@ -58,7 +58,7 @@ public:
 		return ret;
 	}
 
-	static int spawn (const StringSeq& argv, const SpawnFiles& files)
+	static Process::_ref_type spawn (const StringSeq& argv, const SpawnFiles& files)
 	{
 		if (argv.empty () || argv.front ().empty ())
 			throw_BAD_PARAM ();
@@ -76,19 +76,19 @@ public:
 		if (!Core::Binary::is_supported_platform (platform))
 			BindError::throw_unsupported_platform (platform);
 
-		int32_t ret;
+		Process::_ref_type process;
 		if (Core::SINGLE_DOMAIN || PLATFORM == platform) {
-			ret = (int)Nirvana::ProtDomainCore::_narrow (
+			process = Nirvana::ProtDomainCore::_narrow (
 				CORBA::Core::Services::bind (CORBA::Core::Services::ProtDomain))
 				->spawn (binary, argv, files);
 		} else {
 			Nirvana::ProtDomainCore::_ref_type domain = ProtDomainCore::_narrow (
 				Nirvana::SysDomain::_narrow (CORBA::Core::Services::bind (CORBA::Core::Services::SysDomain))
 				->provide_manager ()->create_prot_domain (platform));
-			ret = domain->spawn (binary, argv, files);
+			process = domain->spawn (binary, argv, files);
 			domain->shutdown (0);
 		}
-		return (int)ret;
+		return process;
 	}
 
 	static void create_pipe (AccessChar::_ref_type& pipe_out, AccessChar::_ref_type& pipe_in)

@@ -74,8 +74,13 @@ void Startup::run_command ()
 
 		if (cmdlet)
 			ret_ = the_shell->cmdlet (argv, files);
-		else
-			ret_ = the_shell->spawn (argv, files);
+		else {
+			Process::_ref_type process = the_shell->spawn (argv, files);
+			process->wait (std::numeric_limits <TimeBase::TimeT>::max ());
+			int32_t ret;
+			process->get_exit_code (ret);
+			ret_ = (int)ret;
+		}
 
 		Scheduler::shutdown (0);
 	}

@@ -34,6 +34,7 @@
 #include "Binder.h"
 #include "ORB/Services.h"
 #include "ORB/system_services.h"
+#include "ProcessImpl.h"
 
 namespace Nirvana {
 namespace Core {
@@ -77,17 +78,17 @@ public:
 		Binder::get_module_bindings (binary, bindings);
 	}
 
-	static int spawn (AccessDirect::_ptr_type file, StringSeq& argv, const SpawnFiles& files)
+	static Process::_ref_type spawn (AccessDirect::_ptr_type file, StringSeq& argv, const SpawnFiles& files)
 	{
-		Core::Executable executable (file);
-
-		int ret = -1;
-		SYNC_BEGIN (executable, &Core::Heap::user_heap ());
+		auto process = CORBA::make_reference <ProcessImpl> (file, std::ref (argv));
 		Core::MemContext::current ().set_spawn_files (files);
-		ret = executable.main (argv);
-		SYNC_END ();
-
-		return ret;
+		try {
+			ExecDomain::start_process (*process);
+		} catch (...) {
+			process->on_exception ();
+			throw;
+		}
+		return process->_this ();
 	}
 
 	static IDL::String binary_dir ();

@@ -206,8 +206,11 @@ void MemContext::get_spawn_files (SpawnFiles& files) const
 	if (fdc)
 		fdc->get_spawn_files (files.files ());
 	const CurrentDirContext* cwd = current_dir_ptr ();
-	if (cwd)
-		files.work_dir (CosNaming::Core::NameService::to_string_unchecked (cwd->current_dir ()));
+	if (cwd) {
+		const auto& dir = cwd->current_dir ();
+		if (!dir.empty ())
+			files.work_dir (CosNaming::Core::NameService::to_string_unchecked (dir));
+	}
 }
 
 void MemContext::set_spawn_files (const SpawnFiles& files)

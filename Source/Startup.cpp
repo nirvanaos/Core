@@ -26,6 +26,7 @@
 
 #include "Startup.h"
 #include "ExecDomain.h"
+#include "ProtDomain.h"
 #include "initterm.h"
 #include <Nirvana/Shell.h>
 
@@ -70,7 +71,7 @@ void Startup::run_command ()
 
 		SpawnFiles files;
 		the_shell->get_spawn_files (files);
-		files.work_dir ("/sbin");
+		files.work_dir (ProtDomain::binary_dir ());
 
 		if (cmdlet)
 			ret_ = the_shell->cmdlet (argv, files);

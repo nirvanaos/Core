@@ -134,6 +134,7 @@ Name NameService::to_name (const StringName& sn)
 
 NameService::StringName NameService::to_string_unchecked (const Name& n)
 {
+	assert (!n.empty ());
 	StringName sn;
 	size_t size = n.size () - 1;
 	for (const NameComponent& nc : n) {

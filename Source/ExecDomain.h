@@ -36,6 +36,7 @@
 #include "Security.h"
 #include "ORB/SystemExceptionHolder.h"
 #include "ConditionalCreator.h"
+#include <setjmpex.h>
 #include <limits>
 #include <utility>
 #include <Nirvana/signal_defs.h>
@@ -75,6 +76,14 @@ public:
 		ExecDomain* ed = Thread::current ().exec_domain ();
 		assert (ed);
 		return *ed;
+	}
+
+	static ExecDomain* current_ptr () noexcept
+	{
+		Core::Thread* th = Core::Thread::current_ptr ();
+		if (th)
+			return th->exec_domain ();
+		return nullptr;
 	}
 
 	/// Asynchronous call.
@@ -227,8 +236,11 @@ public:
 		assert (Thread::current ().exec_domain () == this);
 		assert (runnable_);
 		Runnable* runnable = runnable_;
-		ExecContext::run ();
-		assert (!runnable_); // Cleaned inside ExecContext::run ();
+		if (!setjmp (crash_jmp_buf_)) {
+			ExecContext::run ();
+			assert (!runnable_); // Cleaned inside ExecContext::run ();
+		} else
+			on_crash ();
 
 		// If Runnable object was constructed in-place, destruct it.
 		if (runnable == (Runnable*)&runnable_space_)
@@ -237,9 +249,13 @@ public:
 		cleanup ();
 	}
 
-	/// Called from the Port implementation in case of the unrecoverable error.
-	/// \param signal The signal information.
-	void on_crash (const siginfo& signal) noexcept
+	NIRVANA_NORETURN void on_crash (const siginfo& signal) noexcept
+	{
+		crash_signal_ = signal;
+		longjmp (crash_jmp_buf_, 1);
+	}
+
+	void on_crash () noexcept
 	{
 		// Leave sync domain if one.
 		switch_to_free_sync_context ();
@@ -248,23 +264,24 @@ public:
 		unwind_mem_context ();
 
 		if (runnable_) {
-			runnable_->on_crash (signal);
-			// If Runnable object was constructed in-place, destruct it.
-			if (runnable_ == (Runnable*)&runnable_space_)
-				runnable_->~Runnable ();
+			runnable_->on_crash (crash_signal_);
 			runnable_ = nullptr;
 		} else
-			unrecoverable_error (signal.si_signo);
-
-		cleanup ();
+			unrecoverable_error (crash_signal_.si_signo);
 	}
 
 	/// Called from the Port implementation in case of the signal.
 	/// \param signal The signal information.
 	/// 
-	/// \returns `true` to continue execution,
-	///          `false` to unwind and call on_crash().
 	static bool on_signal (const siginfo_t& signal);
+
+	static NIRVANA_NORETURN void raise (int signo)
+	{
+		siginfo_t signal { 0 };
+		signal.si_signo = signo;
+		signal.si_excode = CORBA::Exception::EC_NO_EXCEPTION;
+		on_signal (signal);
+	}
 
 	SyncContext& sync_context () const noexcept
 	{
@@ -622,6 +639,9 @@ private:
 	void* tls_ [CORE_TLS_COUNT];
 
 	CORBA::Core::SystemExceptionHolder resume_exception_;
+
+	siginfo_t crash_signal_;
+	jmp_buf crash_jmp_buf_;
 
 	typename std::aligned_storage <MAX_RUNNABLE_SIZE>::type runnable_space_;
 

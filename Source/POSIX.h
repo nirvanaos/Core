@@ -100,18 +100,10 @@ public:
 
 	static void raise (int signal)
 	{
-		Core::Thread* th = Core::Thread::current_ptr ();
-		if (th) {
-			Core::ExecDomain* ed = th->exec_domain ();
-			if (ed) {
-				if (Core::Signals::is_supported (signal))
-					ed->raise (signal);
-				else
-					throw_BAD_PARAM ();
-			}
-			return;
-		}
-		unrecoverable_error (signal);
+		if (Core::Signals::is_supported (signal))
+			Core::ExecDomain::raise (signal);
+		else
+			throw_BAD_PARAM ();
 	}
 
 	static void sigaction (int signal, const struct sigaction* act, struct sigaction* oldact)

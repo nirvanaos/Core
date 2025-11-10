@@ -522,10 +522,14 @@ void ExecDomain::Suspend::run () noexcept
 
 bool ExecDomain::on_signal (const siginfo_t& signal)
 {
-	// TODO: Check for the signal handlers and return true if signal is handled.
-	if (signal.si_excode >= 0)
-		Binder::raise_exception (signal);
-
+	ExecDomain* ed = current_ptr ();
+	if (ed) {
+		// TODO: Check for the signal handlers and return true if signal is handled.
+		if (signal.si_excode >= 0)
+			Binder::raise_exception (signal);
+		else
+			ed->on_crash (signal);
+	}
 	return false;
 }
 

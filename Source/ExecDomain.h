@@ -36,7 +36,7 @@
 #include "Security.h"
 #include "ORB/SystemExceptionHolder.h"
 #include "ConditionalCreator.h"
-#include <setjmpex.h>
+#include <setjmp.h>
 #include <limits>
 #include <utility>
 #include <Nirvana/signal_defs.h>

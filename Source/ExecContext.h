@@ -76,12 +76,6 @@ public:
 		Port::ExecContext::switch_to ();
 	}
 
-	/// Raise signal.
-	NIRVANA_NORETURN void raise (int signal)
-	{
-		Port::ExecContext::raise (signal);
-	}
-
 	Runnable* runnable () const noexcept
 	{
 		return runnable_;

@@ -36,19 +36,11 @@ namespace Core {
 class Signals
 {
 public:
-	static const size_t SUPPORTED_COUNT = 6;
-
-	static int signal_index (int signal) noexcept;
-
-	static bool is_supported (int signal) noexcept
-	{
-		return signal_index (signal) >= 0;
-	}
-
+	static void raise (int signal);
 	static CORBA::Exception::Code signal2ex (int signal) noexcept;
 
 private:
-	static const int supported_signals_ [SUPPORTED_COUNT];
+	static int signal_index (int signal) noexcept;
 
 	struct SigToExc
 	{
@@ -56,6 +48,7 @@ private:
 		CORBA::Exception::Code ec;
 	};
 
+	static const int supported_signals_ [];
 	static const SigToExc sig2exc_ [];
 };
 

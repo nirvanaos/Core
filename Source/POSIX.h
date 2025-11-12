@@ -100,10 +100,7 @@ public:
 
 	static void raise (int signal)
 	{
-		if (Core::Signals::is_supported (signal))
-			Core::ExecDomain::raise (signal);
-		else
-			throw_BAD_PARAM ();
+		Core::Signals::raise (signal);
 	}
 
 	static void sigaction (int signal, const struct sigaction* act, struct sigaction* oldact)

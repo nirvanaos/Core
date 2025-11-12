@@ -26,11 +26,12 @@
 #include "Signals.h"
 #include <Nirvana/signal_defs.h>
 #include <algorithm>
+#include "ExecDomain.h"
 
 namespace Nirvana {
 namespace Core {
 
-const int Signals::supported_signals_ [SUPPORTED_COUNT] = {
+const int Signals::supported_signals_ [] = {
 	SIGINT,
 	SIGABRT,
 	SIGTERM
@@ -42,12 +43,23 @@ const Signals::SigToExc Signals::sig2exc_ [] = {
 	{ SIGSEGV, CORBA::SystemException::EC_ACCESS_VIOLATION }
 };
 
-int Signals::signal_index (int signal) noexcept
+inline int Signals::signal_index (int signal) noexcept
 {
 	const int* p = std::lower_bound (supported_signals_, std::end (supported_signals_), signal);
 	if (p != std::end (supported_signals_) && *p == signal)
 		return (int)(p - supported_signals_);
 	return -1;
+}
+
+void Signals::raise (int signo)
+{
+	if (signal_index (signo) >= 0) {
+		siginfo_t signal { 0 };
+		signal.si_signo = signo;
+		signal.si_excode = CORBA::Exception::EC_NO_EXCEPTION;
+		ExecDomain::on_signal (signal);
+	} else
+		throw_BAD_PARAM ();
 }
 
 CORBA::Exception::Code Signals::signal2ex (int signal) noexcept

@@ -275,14 +275,6 @@ public:
 	/// 
 	static bool on_signal (const siginfo_t& signal);
 
-	static NIRVANA_NORETURN void raise (int signo)
-	{
-		siginfo_t signal { 0 };
-		signal.si_signo = signo;
-		signal.si_excode = CORBA::Exception::EC_NO_EXCEPTION;
-		on_signal (signal);
-	}
-
 	SyncContext& sync_context () const noexcept
 	{
 		assert (sync_context_);

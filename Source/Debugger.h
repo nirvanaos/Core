@@ -27,7 +27,7 @@
 #define NIRVANA_CORE_DEBUGGER_H_
 
 #include "RuntimeSupport.h"
-#include "ExecDomain.h"
+#include "Signals.h"
 #include "SharedAllocator.h"
 #include <Nirvana/signal_defs.h>
 #include <Port/Debugger.h>
@@ -73,14 +73,7 @@ public:
 		Port::Debugger::output_debug_string (evt, s.c_str ());
 		if (evt >= DebugEvent::DEBUG_WARNING && !Port::Debugger::debug_break (evt)) {
 			if (evt >= DebugEvent::DEBUG_ASSERT) {
-				Thread* th = Thread::current_ptr ();
-				if (th && th->executing ()) {
-					ExecDomain* ed = th->exec_domain ();
-					if (ed) {
-						ed->raise (SIGABRT);
-						return;
-					}
-				}
+				Signals::raise (SIGABRT);
 				unrecoverable_error (SIGABRT);
 			}
 		}

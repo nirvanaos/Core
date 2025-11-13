@@ -30,6 +30,7 @@
 
 #include <CORBA/CORBA.h>
 
+#include <intrin.h>
 #include "parallel-hashmap/parallel_hashmap/phmap.h"
 
 namespace Nirvana {

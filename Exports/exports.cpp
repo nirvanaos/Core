@@ -24,6 +24,7 @@
 *  popov.nirvana@gmail.com
 */
 #include "../Source/Memory.h"
+#include "../Source/CoreMemory.h"
 #include "../Source/FileAccessBuf.h"
 #include "../Source/Shell.h"
 #include "../Source/ORB/ExceptionHolder.h"
@@ -42,10 +43,10 @@ NIRVANA_EXPORT_STATIC (_exp_Nirvana_the_posix, "Nirvana/the_posix", Nirvana::Sta
 
 namespace Nirvana {
 
-NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Memory> NIRVANA_SELECTANY the_memory = { OLF_IMPORT_INTERFACE,
-	"Nirvana/the_memory", CORBA::Internal::RepIdOf <Memory>::id, Core::Memory::_bridge ()};
+NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Memory> the_memory = { OLF_IMPORT_INTERFACE,
+	"Nirvana/the_memory", CORBA::Internal::RepIdOf <Memory>::id, Core::CoreMemory::_bridge ()};
 
-NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Debugger> NIRVANA_SELECTANY the_debugger = { OLF_IMPORT_INTERFACE,
+NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Debugger> the_debugger = { OLF_IMPORT_INTERFACE,
 	"Nirvana/the_debugger", CORBA::Internal::RepIdOf <Debugger>::id, Core::Debugger::_bridge ()};
 
 NIRVANA_STATIC_IMPORT ImportInterfaceT <Module> the_module = { OLF_IMPORT_INTERFACE,

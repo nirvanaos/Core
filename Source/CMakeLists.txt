@@ -30,12 +30,14 @@ target_sources (Core PRIVATE
 	HeapCustom.cpp
 	HeapDirectory.cpp
 	initterm.cpp
+	InternalRequest.cpp
 	LocaleImpl.cpp
 	LockablePtr.cpp
 	MemContext.cpp
 	Module.cpp
 	ObjectPool.cpp
 	open_binary.cpp
+	ProcessImpl.cpp
 	ProtDomain.cpp
 	RandomGen.cpp
 	Runnable.cpp

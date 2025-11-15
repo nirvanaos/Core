@@ -69,12 +69,12 @@ protected:
 
 		void* operator new (size_t cb)
 		{
-			return _aligned_malloc (cb, alignment);
+			return aligned_alloc (alignment, cb);
 		}
 
 		void operator delete (void* p)
 		{
-			_aligned_free (p);
+			free (p);
 		}
 	};
 

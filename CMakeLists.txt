@@ -19,3 +19,5 @@ target_precompile_headers (Core PUBLIC
 	"Source/MapUnorderedUnstable.h"
 )
 # ]===]
+
+add_subdirectory (Test/TestCore)

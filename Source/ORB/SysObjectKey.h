@@ -36,6 +36,9 @@
 namespace CORBA {
 namespace Core {
 
+// Use inline anonimous namespace to avoid linker errors "duplicated symbol".
+inline namespace {
+
 template <class Servant> struct SysObjectKey
 {
 	static const Octet key [];
@@ -59,4 +62,6 @@ template <class Servant> struct SysObjectKey
 
 }
 }
+}
+
 #endif

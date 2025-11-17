@@ -28,6 +28,8 @@
 namespace Nirvana {
 namespace Core {
 
+const TimeBase::TimeT TimeoutBase::TIMEOUT_DEADLINE;
+
 TimeoutBase::TimeoutBase () :
 	nearest_expire_time_ (NO_EXPIRE)
 {}

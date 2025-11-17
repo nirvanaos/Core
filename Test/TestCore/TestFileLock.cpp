@@ -65,6 +65,8 @@ protected:
 	static const Nirvana::FileSize FILE_SIZE_MAX = std::numeric_limits <Nirvana::FileSize>::max ();
 };
 
+const Nirvana::FileSize TestFileLock::FILE_SIZE_MAX;
+
 TEST_F (TestFileLock, Empty)
 {
 	FileLockRanges ranges;

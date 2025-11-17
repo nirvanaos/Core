@@ -31,6 +31,8 @@ using namespace Nirvana::Core;
 namespace CORBA {
 namespace Core {
 
+const TimeBase::TimeT ProtDomainsWaitable::DEADLINE_MAX;
+
 servant_reference <DomainProt> ProtDomainsWaitable::get (ESIOP::ProtDomainId domain_id)
 {
 	auto ins = map_.emplace (domain_id, DEADLINE_MAX);

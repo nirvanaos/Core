@@ -29,6 +29,10 @@
 namespace Nirvana {
 namespace Core {
 
+const SteadyTime FileAccessDirect::DEFAULT_WRITE_TIMEOUT;
+const SteadyTime FileAccessDirect::DEFAULT_DISCARD_TIMEOUT;
+const TimeBase::TimeT FileAccessDirect::HOUSEKEEPING_PERIOD;
+
 FileAccessDirect::~FileAccessDirect ()
 {
 	try {

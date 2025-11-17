@@ -33,6 +33,8 @@ using namespace CORBA::Core;
 namespace CORBA {
 namespace Core {
 
+const TimeBase::TimeT Reference::DEADLINE_MAX;
+
 IDL::String Reference::_repository_id ()
 {
 	if (has_primary_interface ())

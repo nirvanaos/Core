@@ -44,6 +44,8 @@ StaticallyAllocated <ImplStatic <SyncDomainCore> > Binder::sync_domain_;
 StaticallyAllocated <Binder> Binder::singleton_;
 bool Binder::initialized_ = false;
 
+const TimeBase::TimeT Binder::MODULE_LOADING_DEADLINE_MAX;
+
 void Binder::ObjectMap::insert (const char* name, InterfacePtr itf, SyncContext* sc)
 {
 	assert (itf);

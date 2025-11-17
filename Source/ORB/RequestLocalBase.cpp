@@ -36,6 +36,8 @@ using namespace Internal;
 
 namespace Core {
 
+const size_t RequestLocalBase::BLOCK_SIZE;
+
 RequestLocalBase::RequestLocalBase (Heap* callee_memory, unsigned response_flags) noexcept :
 	caller_memory_ (&MemContext::current ()),
 	callee_memory_ (callee_memory),

@@ -33,6 +33,8 @@ using namespace CORBA::Core;
 namespace PortableServer {
 namespace Core {
 
+const TimeBase::TimeT POA_Activator::ACTIVATION_TIMEOUT;
+
 inline
 Object::_ref_type POA_Activator::incarnate (Type <ObjectId>::C_in oid)
 {

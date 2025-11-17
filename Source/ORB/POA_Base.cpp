@@ -37,6 +37,8 @@ using namespace Nirvana::Core;
 namespace PortableServer {
 namespace Core {
 
+const TimeBase::TimeT POA_Base::ADAPTER_ACTIVATION_TIMEOUT;
+
 POA_Root* POA_Base::root_;
 
 Interface* POA_Base::_s_get_servant (Bridge <POA>* _b, Interface* _env) noexcept

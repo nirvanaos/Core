@@ -69,12 +69,20 @@ protected:
 
 		void* operator new (size_t cb)
 		{
+#if defined (_MSC_VER) && !defined (__clang__)
+			return _aligned_malloc (cb, alignment);
+#else
 			return aligned_alloc (alignment, cb);
+#endif
 		}
 
 		void operator delete (void* p)
 		{
+#if defined (_MSC_VER) && !defined (__clang__)
+			_aligned_free (p);
+#else
 			free (p);
+#endif
 		}
 	};
 

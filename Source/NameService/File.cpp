@@ -47,12 +47,5 @@ void File::check_flags (unsigned flags) const
 		throw_NO_PERMISSION (make_minor_errno (EACCES)); // File is unaccessible for this mode
 }
 
-void FileAccessDirectProxy::check_flags (uint_fast16_t f) const
-{
-	if (!(f & O_DIRECT))
-		throw_INV_FLAG (make_minor_errno (EINVAL));
-	file_->check_flags (f);
-}
-
 }
 }

@@ -110,12 +110,12 @@ void FileAccessBuf::check_write () const
 		throw_NO_PERMISSION (make_minor_errno (EBADF));
 }
 
-uint_fast16_t FileAccessBuf::check_flags (uint_fast16_t f) const
+unsigned FileAccessBuf::check_flags (unsigned f) const
 {
 	if (f & O_DIRECT)
 		throw_INV_FLAG (make_minor_errno (EINVAL));
 
-	uint_fast16_t changes = flags () ^ f;
+	unsigned changes = flags () ^ f;
 	if (changes & ~(O_APPEND | O_SYNC | O_TEXT | O_NONBLOCK | O_ACCMODE))
 		throw_INV_FLAG (make_minor_errno (EINVAL));
 

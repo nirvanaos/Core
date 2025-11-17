@@ -235,7 +235,7 @@ private:
 	void check (const void* p) const;
 	void check_read () const;
 	void check_write () const;
-	uint_fast16_t check_flags (uint_fast16_t f) const;
+	unsigned check_flags (unsigned f) const;
 
 	bool flush_internal (bool sync = false);
 

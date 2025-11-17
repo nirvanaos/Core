@@ -134,12 +134,12 @@ public:
 
 private:
 	void check_exist () const;
-	void check_flags (uint_fast16_t flags) const;
+	void check_flags (unsigned flags) const;
 
 private:
 	FileAccessDirect& driver_;
 	Ref <File> file_;
-	uint_fast16_t flags_;
+	unsigned flags_;
 	bool dirty_;
 };
 

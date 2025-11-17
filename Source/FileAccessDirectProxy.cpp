@@ -24,6 +24,7 @@
 *  popov.nirvana@gmail.com
 */
 #include "FileAccessDirectProxy.h"
+#include "NameService/File.h"
 
 namespace Nirvana {
 namespace Core {
@@ -32,6 +33,13 @@ void FileAccessDirectProxy::check_exist () const
 {
 	if (!file_)
 		throw CORBA::OBJECT_NOT_EXIST ();
+}
+
+void FileAccessDirectProxy::check_flags (unsigned f) const
+{
+	if (!(f & O_DIRECT))
+		throw_INV_FLAG (make_minor_errno (EINVAL));
+	file_->check_flags (f);
 }
 
 }

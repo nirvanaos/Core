@@ -131,7 +131,6 @@ TYPED_TEST (TestStack, MultiThread)
 
 	std::vector <thread> threads;
 	threads.reserve (thread_cnt);
-	std::random_device rd;
 	for (unsigned cnt = thread_cnt; cnt; --cnt) {
 		threads.emplace_back (thread (
 			[&stack](unsigned seed) {
@@ -151,7 +150,7 @@ TYPED_TEST (TestStack, MultiThread)
 						stack.push (*buf [i]);
 					}
 				}
-			}, rd ()));
+			}, cnt));
 	}
 
 	for (auto& t : threads) {

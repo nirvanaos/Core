@@ -20,4 +20,9 @@ target_precompile_headers (Core PUBLIC
 )
 # ]===]
 
+add_custom_command (TARGET Core POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory
+		"${NIRVANA_CORE_SDK_DIR}/${NIRVANA_HOST_TYPE}/bin/${NIRVANA_TARGET_PLATFORM}/$<CONFIG>"
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)
 add_subdirectory (Test/TestCore)

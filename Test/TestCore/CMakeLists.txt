@@ -23,14 +23,9 @@ target_link_libraries (TestCore PRIVATE
 	pe
 )
 target_compile_definitions (TestCore PRIVATE GTEST_HAS_POSIX_RE=0 GTEST_HAS_SEH=0)
-add_custom_command (TARGET TestCore POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-		"${NIRVANA_CORE_SDK_DIR}/${NIRVANA_HOST_TYPE}/bin/${NIRVANA_TARGET_PLATFORM}/$<CONFIG>"
-		$<TARGET_FILE_DIR:TestCore>
-)
 
-#include (GoogleTest)
-#gtest_discover_tests (TestCore
-#	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-#	PROPERTIES DISCOVERY_TIMEOUT 60
-#)
+include (GoogleTest)
+gtest_discover_tests (TestCore
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	PROPERTIES DISCOVERY_TIMEOUT 60
+)

@@ -39,6 +39,7 @@
 #include "unrecoverable_error.h"
 #include "Chrono.h"
 #include "SystemInfo.h"
+#include "Security.h"
 
 namespace Nirvana {
 
@@ -326,6 +327,11 @@ public:
 	static void exit (int retcode)
 	{
 		throw_NO_IMPLEMENT ();
+	}
+
+	static void get_entropy (void* buf, size_t cb)
+	{
+		Core::Security::get_entropy (buf, cb);
 	}
 
 private:

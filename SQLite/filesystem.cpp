@@ -31,7 +31,6 @@
 #include <Nirvana/POSIX.h>
 #include <Nirvana/c_heap_dbg.h>
 #include <Nirvana/posix_defs.h>
-#include <Nirvana/RandomGen.h>
 
 extern "C" int sqlite3_os_init ()
 {
@@ -461,17 +460,11 @@ extern "C" int xCurrentTimeInt64 (sqlite3_vfs*, sqlite3_int64* time)
 
 extern "C" int xRandomness (sqlite3_vfs*, int nByte, char* zOut)
 {
-	Nirvana::RandomGen random ((Nirvana::RandomGen::result_type)Nirvana::the_posix->UTC ().time ());
-	for (size_t cnt = nByte; cnt > 0;) {
-		Nirvana::RandomGen::result_type rnd = random ();
-		size_t bcnt = sizeof (Nirvana::RandomGen::result_type);
-		if (bcnt > cnt)
-			bcnt = cnt;
-		const char* src = (const char*)&rnd;
-		zOut = std::copy (src, src + bcnt, zOut);
-		cnt -= bcnt;
-	}
-	return nByte;
+	try {
+		Nirvana::the_posix->get_entropy (zOut, nByte);
+		return nByte;
+	} catch (...) {}
+	return 0;
 }
 
 const size_t HEAP_BLOCK_OVERHEAD = sizeof (Nirvana::HeapBlockHdrType) + Nirvana::HeapBlockHdrType::TRAILER_SIZE;

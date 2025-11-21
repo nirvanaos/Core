@@ -127,6 +127,11 @@ public:
 	{
 		return Base::get_name (id);
 	}
+
+	static void get_entropy (void* buf, size_t size)
+	{
+		Base::get_entropy (buf, size);
+	}
 };
 
 }

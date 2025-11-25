@@ -11,6 +11,7 @@ target_sources (Core PRIVATE
 	CoreModule.cpp
 	CurrentDirContext.cpp
 	deactivate_servant.cpp
+	DeadlinePolicyContext.cpp
 	Event.cpp
 	EventSync.cpp
 	EventSyncTimeout.cpp

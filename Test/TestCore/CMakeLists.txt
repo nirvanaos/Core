@@ -20,7 +20,6 @@ target_link_libraries (TestCore PRIVATE
 	mockhost
 	crtl-main
 	googletest-nirvana
-	pe
 )
 target_compile_definitions (TestCore PRIVATE GTEST_HAS_POSIX_RE=0 GTEST_HAS_SEH=0)
 

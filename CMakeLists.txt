@@ -35,60 +35,60 @@ set (idl_nirvana "${NIRVANA_SDK_DIR}/include/Nirvana")
 set (idl_orb "${NIRVANA_SDK_DIR}/include/CORBA")
 
 set (proxy_idl
-	${idl_nirvana}/BindError.idl
-	${idl_nirvana}/Domains.idl
-	${idl_nirvana}/File.idl
-	${idl_nirvana}/FileStat.idl
-	${idl_nirvana}/NDBC_ex.idl
-	${idl_nirvana}/Packages.idl
-	${idl_nirvana}/Shell.idl
+	Nirvana/BindError.idl
+	Nirvana/Domains.idl
+	Nirvana/File.idl
+	Nirvana/FileStat.idl
+	Nirvana/NDBC_ex.idl
+	Nirvana/Packages.idl
+	Nirvana/Shell.idl
 
-	${idl_orb}/AMI.idl
-	${idl_orb}/Components.idl
-	${idl_orb}/Context.idl
-	${idl_orb}/CORBA_Stream.idl
-	${idl_orb}/CORBA_types.idl
-	${idl_orb}/CosEventChannelAdmin.idl
-	${idl_orb}/CosEventComm.idl
-	${idl_orb}/CosLwLogAdministrator.idl
-	${idl_orb}/CosLwLogConsumer.idl
-	${idl_orb}/CosLwLogProducer.idl
-	${idl_orb}/CosLwLogService.idl
-	${idl_orb}/CosLwLogStatus.idl
-	${idl_orb}/CosNaming.idl
-	${idl_orb}/CosTime.idl
-	${idl_orb}/CosTimerEvent.idl
-	${idl_orb}/CosTypedEventChannelAdmin.idl
-	${idl_orb}/CosTypedEventComm.idl
-	${idl_orb}/Current.idl
-	${idl_orb}/DomainManager.idl
-	${idl_orb}/Dynamic.idl
-#	${idl_orb}/DynamicServant.idl
-	${idl_orb}/FT.idl
-	${idl_orb}/Messaging.idl
-	${idl_orb}/NirvanaDGC.idl
-#	${idl_orb}/NVList.idl
-#	${idl_orb}/ObjectFactory.idl
-#	${idl_orb}/ORB.idl
-#	${idl_orb}/Policy.idl
-	${idl_orb}/Pollable.idl
-#	${idl_orb}/RefCnt.idl
-	${idl_orb}/Request.idl
-#	${idl_orb}/SFloat.idl
-	${idl_orb}/TCKind.idl
-	${idl_orb}/TimeBase.idl
+	CORBA/AMI.idl
+	CORBA/Components.idl
+	CORBA/Context.idl
+	CORBA/CORBA_Stream.idl
+	CORBA/CORBA_types.idl
+	CORBA/CosEventChannelAdmin.idl
+	CORBA/CosEventComm.idl
+	CORBA/CosLwLogAdministrator.idl
+	CORBA/CosLwLogConsumer.idl
+	CORBA/CosLwLogProducer.idl
+	CORBA/CosLwLogService.idl
+	CORBA/CosLwLogStatus.idl
+	CORBA/CosNaming.idl
+	CORBA/CosTime.idl
+	CORBA/CosTimerEvent.idl
+	CORBA/CosTypedEventChannelAdmin.idl
+	CORBA/CosTypedEventComm.idl
+	CORBA/Current.idl
+	CORBA/DomainManager.idl
+	CORBA/Dynamic.idl
+#	CORBA/DynamicServant.idl
+	CORBA/FT.idl
+	CORBA/Messaging.idl
+	CORBA/NirvanaDGC.idl
+#	CORBA/NVList.idl
+#	CORBA/ObjectFactory.idl
+#	CORBA/ORB.idl
+#	CORBA/Policy.idl
+	CORBA/Pollable.idl
+#	CORBA/RefCnt.idl
+	CORBA/Request.idl
+#	CORBA/SFloat.idl
+	CORBA/TCKind.idl
+	CORBA/TimeBase.idl
 
-	${idl_orb}/ccm/CCM_Base.idl
-	${idl_orb}/ccm/CCM_Cookie.idl
-	${idl_orb}/ccm/CCM_Events.idl
-	${idl_orb}/ccm/CCM_Exceptions.idl
-	${idl_orb}/ccm/CCM_Home.idl
-	${idl_orb}/ccm/CCM_Navigation.idl
-	${idl_orb}/ccm/CCM_Object.idl
-	${idl_orb}/ccm/CCM_Receptacle.idl
+	CORBA/ccm/CCM_Base.idl
+	CORBA/ccm/CCM_Cookie.idl
+	CORBA/ccm/CCM_Events.idl
+	CORBA/ccm/CCM_Exceptions.idl
+	CORBA/ccm/CCM_Home.idl
+	CORBA/ccm/CCM_Navigation.idl
+	CORBA/ccm/CCM_Object.idl
+	CORBA/ccm/CCM_Receptacle.idl
 )
 
-nirvana_compile_idl (Nirvana IDL_FILES ${proxy_idl} OPTIONS -proxy -DCCM_LW -DCCM_NOEVENT)
+nirvana_compile_idl (Nirvana IDL_FILES ${proxy_idl} OPTIONS -proxy -DCCM_LW -DCCM_NOEVENT IDL_ROOT "${NIRVANA_SDK_DIR}/include")
 nirvana_compile_idl (Nirvana IDL_FILES ${core_idl} OPTIONS -proxy OUT_H ${core_idl_h_dir})
 target_link_libraries (Nirvana PRIVATE Core Port)
 target_link_options (Nirvana PRIVATE "LINKER:/entry:nirvana_startup")

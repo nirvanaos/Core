@@ -1,6 +1,7 @@
 target_sources (Core PRIVATE
 	call_handler.cpp
 	CallbackRef.cpp
+	CCM_Cookie.cpp
 	CodeSetConverter.cpp
 	Domain.cpp
 	DomainProt.cpp

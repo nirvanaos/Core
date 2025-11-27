@@ -1,3 +1,5 @@
+# Core library
+
 add_library (Core STATIC)
 
 target_include_directories (Core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
@@ -21,12 +23,16 @@ target_precompile_headers (Core PUBLIC
 )
 # ]===]
 
+# Core test
 add_custom_command (TARGET Core POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		"${NIRVANA_CORE_SDK_DIR}/${NIRVANA_HOST_TYPE}/bin/${NIRVANA_TARGET_PLATFORM}/$<CONFIG>"
 		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
+
 add_subdirectory (Test/TestCore)
+
+# Nirvana executable
 
 add_executable (Nirvana)
 add_subdirectory (Exports)
@@ -92,3 +98,13 @@ nirvana_compile_idl (Nirvana IDL_FILES ${proxy_idl} OPTIONS -proxy -DCCM_LW -DCC
 nirvana_compile_idl (Nirvana IDL_FILES ${core_idl} OPTIONS -proxy OUT_H ${core_idl_h_dir})
 target_link_libraries (Nirvana PRIVATE Core Port)
 target_link_options (Nirvana PRIVATE "LINKER:/entry:nirvana_startup")
+
+# Core modules
+
+add_subdirectory (dbc)
+#add_subdirectory (DecCalc)
+add_subdirectory (InterfaceRepository)
+add_subdirectory (PacMan)
+#add_subdirectory (SFloat)
+add_subdirectory (shell)
+add_subdirectory (SQLite)

@@ -1,4 +1,5 @@
 nirvana_module (SQLite)
+
 target_sources (SQLite PRIVATE
 	Connection.cpp
 	Cursor.cpp
@@ -13,3 +14,5 @@ target_sources (SQLite PRIVATE
 
 	sqlite/sqlite3.c
 )
+
+target_compile_definitions (SQLite PRIVATE SQLITE_CUSTOM_INCLUDE=../sqlite_config.h NIRVANA_NO_BAD_ALLOC)

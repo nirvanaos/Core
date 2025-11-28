@@ -7,3 +7,4 @@ target_sources (dbc PRIVATE
 	PoolableStatement.cpp
 	ResultSetImpl.cpp
 )
+target_compile_definitions (dbc PRIVATE NIRVANA_NO_BAD_ALLOC)

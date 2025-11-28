@@ -8,3 +8,5 @@ target_sources (PacMan PRIVATE
 	Packages.cpp
 	PacMan.cpp
 )
+
+target_compile_definitions (PacMan PRIVATE NIRVANA_NO_BAD_ALLOC)

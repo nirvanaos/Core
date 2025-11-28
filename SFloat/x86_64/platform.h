@@ -42,14 +42,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /*----------------------------------------------------------------------------
 *----------------------------------------------------------------------------*/
-#define INLINE inline
+#define INLINE static inline
 
 /*----------------------------------------------------------------------------
 *----------------------------------------------------------------------------*/
 //#define THREAD_LOCAL __declspec (thread)
 
-//#if defined (__GNUG__) || defined (__clang__)
-//#define SOFTFLOAT_BUILTIN_CLZ 1
-//#define INLINE inline
-//#include "opts-GCC.h"
-//#endif
+#if defined (__GNUG__) || defined (__clang__)
+#define SOFTFLOAT_BUILTIN_CLZ 1
+#include "opts-GCC.h"
+#endif

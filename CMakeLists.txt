@@ -102,7 +102,7 @@ target_link_options (Nirvana PRIVATE "LINKER:/entry:nirvana_startup")
 # Core modules
 
 add_subdirectory (dbc)
-#add_subdirectory (DecCalc)
+add_subdirectory (DecCalc)
 add_subdirectory (InterfaceRepository)
 add_subdirectory (PacMan)
 add_subdirectory (SFloat)

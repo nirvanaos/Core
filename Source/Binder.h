@@ -239,9 +239,11 @@ public:
 	static void raise_exception (const siginfo_t& signal)
 	{
 		Binary* binary = nullptr;
-		Thread* th = Thread::current_ptr ();
-		if (th && th->executing ())
-			binary = singleton_->binary_map_.find (signal.si_addr);
+		if (initialized_) {
+			Thread* th = Thread::current_ptr ();
+			if (th && th->executing ())
+				binary = singleton_->binary_map_.find (signal.si_addr);
+		}
 		if (binary)
 			binary->raise_exception ((CORBA::SystemException::Code)signal.si_excode, signal.si_code);
 		else

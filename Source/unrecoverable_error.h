@@ -34,7 +34,7 @@ namespace Nirvana {
 namespace Core {
 namespace Port {
 
-NIRVANA_NORETURN void _unrecoverable_error (int code, const char* file, unsigned line);
+NIRVANA_NORETURN void _unrecoverable_error (int code, const char* file, unsigned line) noexcept;
 
 }
 }

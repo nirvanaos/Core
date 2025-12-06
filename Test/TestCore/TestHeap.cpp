@@ -59,7 +59,7 @@ protected:
 		// Code here will be called immediately after the constructor (right
 		// before each test).
 		SystemInfo::initialize ();
-		ASSERT_TRUE (Heap::initialize ());
+		Heap::initialize ();
 		Chrono::initialize ();
 		heap_.construct ();
 	}

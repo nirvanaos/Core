@@ -71,7 +71,7 @@ public:
 					if (bit >= 0) {
 						unsigned idx = (unsigned)((p - bitmap_) * sizeof (BitmapWord) * 8) + bit;
 						deleters_ [idx] = deleter;
-						return idx;
+						return idx + 1;
 					}
 				} while (std::end (bitmap_) != ++p);
 			}
@@ -85,7 +85,7 @@ public:
 	/// \throws CORBA::BAD_PARAM if \p is not allocated.
 	void CS_free (unsigned idx)
 	{
-		if (idx >= USER_TLS_INDEXES_END)
+		if (--idx >= USER_TLS_INDEXES_END)
 			throw_BAD_PARAM ();
 		size_t i = idx / BW_BITS;
 		BitmapWord mask = (BitmapWord)1 << (idx % BW_BITS);
@@ -103,7 +103,7 @@ public:
 	void CS_set (unsigned idx, void* p)
 	{
 		{
-			if (idx >= USER_TLS_INDEXES_END)
+			if (--idx >= USER_TLS_INDEXES_END)
 				throw_BAD_PARAM ();
 			size_t i = idx / BW_BITS;
 			BitmapWord mask = (BitmapWord)1 << (idx % BW_BITS);
@@ -124,7 +124,7 @@ public:
 		if (mc) {
 			TLS_Context* ctx = mc->tls_ptr ();
 			if (ctx)
-				return ctx->get_value (idx);
+				return ctx->get_value (--idx);
 		}
 		return nullptr;
 	}

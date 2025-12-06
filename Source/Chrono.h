@@ -30,6 +30,7 @@
 
 #include <Port/Chrono.h>
 #include <Nirvana/rescale.h>
+#include "unrecoverable_error.h"
 
 namespace Nirvana {
 namespace Core {
@@ -38,9 +39,10 @@ namespace Core {
 class Chrono : private Port::Chrono
 {
 public:
-	static void initialize ()
+	static void initialize () noexcept
 	{
-		Port::Chrono::initialize ();
+		if (!Port::Chrono::initialize ())
+			unrecoverable_error (0);
 	}
 
 	static void terminate () noexcept

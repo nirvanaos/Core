@@ -64,7 +64,7 @@ protected:
 		// Code here will be called immediately after the constructor (right
 		// before each test).
 		Nirvana::Core::SystemInfo::initialize ();
-		ASSERT_TRUE (Nirvana::Core::Heap::initialize ());
+		Nirvana::Core::Heap::initialize ();
 		Nirvana::Core::Chrono::initialize ();
 	}
 

@@ -30,6 +30,7 @@
 
 #include "Scheduler.h"
 #include <Port/Timer.h>
+#include "unrecoverable_error.h"
 
 namespace Nirvana {
 namespace Core {
@@ -67,10 +68,11 @@ public:
 	/// Initialize timers.
 	///
 	/// Called on system startup.
-	static void initialize ()
+	static void initialize () noexcept
 	{
 		assert (!initialized_);
-		Port::Timer::initialize ();
+		if (!Port::Timer::initialize ())
+			unrecoverable_error (0);
 		initialized_ = true;
 	}
 

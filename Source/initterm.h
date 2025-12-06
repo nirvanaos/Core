@@ -33,8 +33,8 @@ namespace Nirvana {
 namespace Core {
 
 /// First initialize stage.
-/// Called by kernel after Heap::initialize ()
-void initialize0 ();
+/// Called by kernel before the RTL initialization.
+void initialize0 () noexcept;
 
 /// Called by Startup class from free sync domain after kernel initialization.
 void initialize ();

@@ -49,7 +49,7 @@ protected:
 	{
 		// Code here will be called immediately after the constructor (right
 		// before each test).
-		ASSERT_TRUE (Nirvana::Core::Heap::initialize ());
+		Nirvana::Core::Heap::initialize ();
 	}
 
 	virtual void TearDown ()

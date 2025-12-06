@@ -145,7 +145,7 @@ public:
 	static Heap& user_heap ();
 
 	/// Global class initialization.
-	static bool initialize () noexcept;
+	static void initialize () noexcept;
 	
 	/// Global class temination.
 	static void terminate () noexcept;

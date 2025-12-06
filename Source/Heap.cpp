@@ -890,15 +890,14 @@ void Heap::BlockList::release_partition (Heap& heap, NodeVal* node) noexcept
 		Base::release_node (node);
 }
 
-bool Heap::initialize () noexcept
+void Heap::initialize () noexcept
 {
 	if (!Port::Memory::initialize ())
-		return false;
+		unrecoverable_error (0);
 	core_heap_.construct (HEAP_UNIT_CORE, true);
 	if (sizeof (void*) > 2)
 		shared_heap_.construct (HEAP_UNIT_DEFAULT, true);
 	HeapDynamic::initialize ();
-	return true;
 }
 
 void Heap::terminate () noexcept

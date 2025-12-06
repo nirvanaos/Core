@@ -63,7 +63,7 @@ public:
 		SHUTDOWN_FINISH
 	};
 
-	static void initialize ()
+	static void initialize () noexcept
 	{
 		global_.construct ();
 	}

@@ -28,7 +28,7 @@
 namespace Nirvana {
 namespace Core {
 
-StaticallyAllocated <CoreModule> g_core_module;
+StaticallyAllocated <TLS> CoreModule::tls_;
 
 }
 }

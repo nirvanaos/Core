@@ -43,15 +43,16 @@
 namespace Nirvana {
 namespace Core {
 
-void initialize0 ()
+void initialize0 () noexcept
 {
 	Chrono::initialize ();
 	g_core_free_sync_context.construct ();
-	g_core_module.construct ();
+	CoreModule::initialize ();
 	Timer::initialize ();
 	ThreadBackground::initialize ();
 	ExecDomain::initialize ();
 	Scheduler::initialize ();
+	Heap::initialize ();
 }
 
 void initialize ()
@@ -115,10 +116,11 @@ void terminate1 () noexcept
 
 void terminate0 () noexcept
 {
+	Heap::terminate ();
 	Scheduler::terminate ();
 	ExecDomain::terminate ();
 	ThreadBackground::terminate ();
-	g_core_module.destruct ();
+	CoreModule::terminate ();
 #ifndef NDEBUG
 	g_core_free_sync_context.destruct ();
 #endif

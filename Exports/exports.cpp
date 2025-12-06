@@ -49,8 +49,8 @@ NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Memory> the_memory = {
 NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Debugger> the_debugger = { OLF_IMPORT_INTERFACE,
 	"Nirvana/the_debugger", CORBA::Internal::RepIdOf <Debugger>::id, Core::Debugger::_bridge ()};
 
-NIRVANA_STATIC_IMPORT ImportInterfaceT <Module> the_module = { OLF_IMPORT_INTERFACE,
-	"Nirvana/the_module", CORBA::Internal::RepIdOf <Module>::id, Core::g_core_module.reference ()._bridge ()};
+NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <Module> the_module = { OLF_IMPORT_INTERFACE,
+	"Nirvana/the_module", CORBA::Internal::RepIdOf <Module>::id, Core::CoreModule::_bridge ()};
 
 NIRVANA_STATIC_IMPORT NIRVANA_CONSTINIT ImportInterfaceT <POSIX> the_posix = { OLF_IMPORT_INTERFACE,
 	"Nirvana/the_posix", CORBA::Internal::RepIdOf <POSIX>::id, Static_the_posix::_bridge ()};

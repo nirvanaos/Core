@@ -26,25 +26,26 @@
 #include <CORBA/Server.h>
 #include <Nirvana/Module_s.h>
 #include "TLS.h"
-#include "AtExit.h"
 #include "StaticallyAllocated.h"
-#include "SharedAllocator.h"
 
 namespace Nirvana {
 namespace Core {
 
 /// Module interface implementation for core static objects.
 class CoreModule :
-	public CORBA::servant_traits <Nirvana::Module>::Servant <CoreModule>
+	public CORBA::servant_traits <Nirvana::Module>::ServantStatic <CoreModule>
 {
 public:
-	CoreModule () = default;
-	
-	~CoreModule ()
+	static void initialize () noexcept
 	{
-		at_exit_.execute ();
+		tls_.construct ();
 	}
 
+	static void terminate () noexcept
+	{
+		tls_.destruct ();
+	}
+	
 	static const void* base_address () noexcept
 	{
 		return nullptr;
@@ -67,35 +68,32 @@ public:
 
 	void atexit (AtExitFunc f)
 	{
-		at_exit_.atexit (f);
+		throw_NO_IMPLEMENT ();
 	}
 
 	unsigned CS_alloc (Deleter deleter)
 	{
-		return tls_.CS_alloc (deleter);
+		return tls_->CS_alloc (deleter);
 	}
 
 	void CS_free (unsigned idx)
 	{
-		tls_.CS_free (idx);
+		tls_->CS_free (idx);
 	}
 
 	void CS_set (unsigned idx, void* p)
 	{
-		tls_.CS_set (idx, p);
+		tls_->CS_set (idx, p);
 	}
 
 	void* CS_get (unsigned idx) noexcept
 	{
-		return tls_.CS_get (idx);
+		return tls_->CS_get (idx);
 	}
 
 private:
-	TLS tls_;
-	AtExitSync <SharedAllocator> at_exit_;
+	static StaticallyAllocated <TLS> tls_;
 };
-
-extern StaticallyAllocated <CoreModule> g_core_module;
 
 }
 }

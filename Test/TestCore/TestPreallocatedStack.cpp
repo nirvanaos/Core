@@ -47,7 +47,7 @@ protected:
 	{
 		// Code here will be called immediately after the constructor (right
 		// before each test).
-		ASSERT_TRUE (Heap::initialize ());
+		Heap::initialize ();
 	}
 
 	virtual void TearDown ()

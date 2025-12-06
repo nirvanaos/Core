@@ -49,7 +49,7 @@ class ThreadBackground :
 	using Creator = ConditionalCreator <ThreadBackground*, BACKGROUND_THREAD_POOLING>;
 
 public:
-	static void initialize ()
+	static void initialize () noexcept
 	{
 		Creator::initialize (BACKGROUND_THREAD_POOL_MIN);
 	}

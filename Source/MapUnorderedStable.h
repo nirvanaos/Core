@@ -30,9 +30,14 @@
 
 #include <CORBA/CORBA.h>
 
-// phmap::node_hash_map is quick unordered map with pointer stability.
+// gtl::node_hash_map is quick unordered map with pointer stability.
 
-#include "parallel-hashmap/parallel_hashmap/phmap.h"
+#ifdef NIRVANA_C20
+#include <gtl/phmap.hpp>
+#else
+#include <unordered_map>
+#include <unordered_set>
+#endif
 
 namespace Nirvana {
 namespace Core {
@@ -40,13 +45,24 @@ namespace Core {
 /// Unordered map with pointer stability.
 template <class Key, class T, class Hash = std::hash <Key>, class KeyEqual = std::equal_to <Key>,
 	template <class> class Allocator = std::allocator>
-	using MapUnorderedStable = phmap::node_hash_map <Key, T, Hash, KeyEqual,
-	Allocator <std::pair <const Key, T> > >;
+	using MapUnorderedStable =
+#ifdef NIRVANA_C20
+	gtl::node_hash_map
+#else
+	std::unordered_map
+#endif
+	<Key, T, Hash, KeyEqual, Allocator <std::pair <const Key, T> > >;
 
 /// Unordered set with pointer stability.
 template <class Key, class Hash = std::hash <Key>, class KeyEqual = std::equal_to <Key>,
 	template <class> class Allocator = std::allocator>
-	using SetUnorderedStable = phmap::node_hash_set <Key, Hash, KeyEqual, Allocator <Key> >;
+	using SetUnorderedStable =
+#ifdef NIRVANA_C20
+	gtl::node_hash_set
+#else
+	std::unordered_set
+#endif
+	<Key, Hash, KeyEqual, Allocator <Key> >;
 
 }
 }

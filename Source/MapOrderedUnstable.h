@@ -30,7 +30,12 @@
 
 #include <CORBA/CORBA.h>
 
-#include "parallel-hashmap/parallel_hashmap/btree.h"
+#ifdef NIRVANA_C20
+#include <gtl/btree.hpp>
+#else
+#include <map>
+#include <set>
+#endif
 
 namespace Nirvana {
 namespace Core {
@@ -38,12 +43,24 @@ namespace Core {
 /// Fast ordered map without the pointer stability.
 template <class Key, class T, class Compare = std::less <Key>,
 	template <class> class Allocator = std::allocator>
-	using MapOrderedUnstable = phmap::btree_map <Key, T, Compare, Allocator <std::pair <const Key, T> > >;
+	using MapOrderedUnstable = 
+#ifdef NIRVANA_C20
+	gtl::btree_map
+#else
+	std::map
+#endif
+	<Key, T, Compare, Allocator <std::pair <const Key, T> > >;
 
 /// Fast ordered set without the pointer stability.
 template <class Key, class Compare = std::less <Key>,
 	template <class> class Allocator = std::allocator>
-	using SetOrderedUnstable = phmap::btree_set <Key, Compare, Allocator <Key> >;
+	using SetOrderedUnstable = 
+#ifdef NIRVANA_C20
+	gtl::btree_set
+#else
+	std::set
+#endif
+	<Key, Compare, Allocator <Key> >;
 
 }
 }

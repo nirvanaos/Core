@@ -71,3 +71,5 @@ add_subdirectory (NameService)
 
 find_package (boost_preprocessor CONFIG REQUIRED)
 target_link_libraries (Core PRIVATE Boost::preprocessor)
+
+target_include_directories (Core PUBLIC ${GTL_INCLUDE_DIRS})

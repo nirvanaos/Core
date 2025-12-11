@@ -30,7 +30,12 @@
 
 #include <CORBA/CORBA.h>
 
-#include "parallel-hashmap/parallel_hashmap/phmap.h"
+#ifdef NIRVANA_C20
+#include <gtl/phmap.hpp>
+#else
+#include <unordered_map>
+#include <unordered_set>
+#endif
 
 namespace Nirvana {
 namespace Core {
@@ -38,12 +43,23 @@ namespace Core {
 /// Unordered map without the pointer stability.
 template <class Key, class T, class Hash = std::hash <Key>, class KeyEqual = std::equal_to <Key>,
 	template <class> class Allocator = std::allocator>
-	using MapUnorderedUnstable = phmap::flat_hash_map <Key, T, Hash, KeyEqual,
-		Allocator <std::pair <const Key, T> > >;
+	using MapUnorderedUnstable =
+#ifdef NIRVANA_C20
+	gtl::flat_hash_map
+#else
+	std::unordered_map
+#endif
+	<Key, T, Hash, KeyEqual, Allocator <std::pair <const Key, T> > >;
 
 template <class Key, class Hash = std::hash <Key>, class KeyEqual = std::equal_to <Key>,
 	template <class> class Allocator = std::allocator>
-	using SetUnorderedUnstable = phmap::flat_hash_set <Key, Hash, KeyEqual, Allocator <Key> >;
+	using SetUnorderedUnstable =
+#ifdef NIRVANA_C20
+	gtl::flat_hash_set
+#else
+	std::unordered_set
+#endif
+	<Key, Hash, KeyEqual, Allocator <Key> >;
 
 }
 }

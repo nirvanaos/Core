@@ -71,13 +71,15 @@ set (proxy_idl
 	CORBA/Dynamic.idl
 #	CORBA/DynamicServant.idl
 	CORBA/FT.idl
+# CORBA/IORequest.idl
 	CORBA/Messaging.idl
 	CORBA/NirvanaDGC.idl
 #	CORBA/NVList.idl
 #	CORBA/ObjectFactory.idl
 #	CORBA/ORB.idl
-#	CORBA/Policy.idl
+	CORBA/Policy.idl
 	CORBA/Pollable.idl
+	CORBA/PortableServer.idl
 #	CORBA/RefCnt.idl
 	CORBA/Request.idl
 #	CORBA/SFloat.idl
@@ -98,6 +100,7 @@ nirvana_compile_idl (Nirvana IDL_FILES ${proxy_idl} OPTIONS -proxy -DCCM_LW -DCC
 nirvana_compile_idl (Nirvana IDL_FILES ${core_idl} OPTIONS -proxy OUT_H ${core_idl_h_dir})
 target_link_libraries (Nirvana PRIVATE Core Port)
 target_link_options (Nirvana PRIVATE "LINKER:/entry:nirvana_startup")
+target_include_directories (Nirvana PRIVATE Source/ORB)
 
 # Core modules
 

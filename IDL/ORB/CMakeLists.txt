@@ -6,7 +6,7 @@ set (core_idl ${core_idl}
 	${CMAKE_CURRENT_SOURCE_DIR}/GSSUP.idl
 	${CMAKE_CURRENT_SOURCE_DIR}/IIOP.idl
 	${CMAKE_CURRENT_SOURCE_DIR}/IOP.idl
-	${CMAKE_CURRENT_SOURCE_DIR}/MessageRouting.idl
+#	${CMAKE_CURRENT_SOURCE_DIR}/MessageRouting.idl
 	${CMAKE_CURRENT_SOURCE_DIR}/RequestCallback.idl
 	${CMAKE_CURRENT_SOURCE_DIR}/TC_Factory.idl
 	PARENT_SCOPE

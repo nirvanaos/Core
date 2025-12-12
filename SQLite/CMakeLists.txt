@@ -16,5 +16,3 @@ target_sources (SQLite PRIVATE
 )
 
 target_compile_definitions (SQLite PRIVATE SQLITE_CUSTOM_INCLUDE=../sqlite_config.h NIRVANA_NO_BAD_ALLOC)
-
-target_include_directories (SQLite PRIVATE ${GTL_INCLUDE_DIRS})

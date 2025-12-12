@@ -1,8 +1,3 @@
-find_path (GTL_INCLUDE_DIRS "gtl/adv_utils.hpp")
-
-# Temporary disable SSE for debug
-add_compile_definitions (GTL_HAVE_SSE2=0 GTL_HAVE_SSSE3=0)
-
 # Core library
 
 add_library (Core STATIC)

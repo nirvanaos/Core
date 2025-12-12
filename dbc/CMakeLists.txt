@@ -8,5 +8,3 @@ target_sources (dbc PRIVATE
 	ResultSetImpl.cpp
 )
 target_compile_definitions (dbc PRIVATE NIRVANA_NO_BAD_ALLOC)
-
-target_include_directories (dbc PRIVATE ${GTL_INCLUDE_DIRS})

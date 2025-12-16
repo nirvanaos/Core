@@ -119,6 +119,8 @@ protected:
 		component_ (nullptr)
 	{}
 
+	ServantProxyBase (const ServantProxyBase&) = delete;
+
 	virtual ~ServantProxyBase ();
 
 	template <class Itf>

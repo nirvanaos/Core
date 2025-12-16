@@ -116,6 +116,7 @@ protected:
 	ServantProxyObject (PortableServer::Servant servant, Object::_ptr_type comp) :
 		ServantProxyBase (servant, comp),
 		adapter_context_ (&get_adapter_context ()),
+		reference_ (nullptr),
 		references_ (adapter_context_->sync_domain ()->mem_context ().heap ())
 	{}
 

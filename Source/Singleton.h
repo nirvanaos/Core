@@ -60,7 +60,6 @@ public:
 
 	virtual SyncContext& sync_context () noexcept override;
 	virtual void atexit (AtExitFunc f) override;
-	virtual void execute_atexit () noexcept override;
 	virtual MemContext* initterm_mem_context () const noexcept override;
 	virtual void terminate () noexcept override;
 

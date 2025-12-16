@@ -482,7 +482,6 @@ void Binder::terminate_and_unbind (Module& mod) noexcept
 	try {
 		Synchronized _sync_frame (mod.sync_context (), mod.initterm_mem_context ());
 
-		mod.execute_atexit ();
 		mod.terminate ();
 		module_unbind (mod._get_ptr (), mod.metadata ());
 		NIRVANA_ASSERT_EX (mod._refcount_value () == 1, true);

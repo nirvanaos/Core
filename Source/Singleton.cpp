@@ -43,11 +43,6 @@ void Singleton::atexit (AtExitFunc f)
 	at_exit_.atexit (f);
 }
 
-void Singleton::execute_atexit () noexcept
-{
-	at_exit_.execute ();
-}
-
 MemContext* Singleton::initterm_mem_context () const noexcept
 {
 	return &SyncDomain::mem_context ();
@@ -56,6 +51,7 @@ MemContext* Singleton::initterm_mem_context () const noexcept
 void Singleton::terminate () noexcept
 {
 	sync_context_type_ = SyncContext::Type::SINGLETON_TERM;
+	at_exit_.execute ();
 	Module::terminate ();
 	sync_context_type_ = SyncContext::Type::SYNC_DOMAIN_SINGLETON;
 }

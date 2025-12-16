@@ -117,7 +117,6 @@ public:
 	virtual void raise_exception (CORBA::SystemException::Code code, unsigned minor) override;
 
 	virtual void atexit (AtExitFunc f) = 0;
-	virtual void execute_atexit () noexcept = 0;
 
 	virtual MemContext* initterm_mem_context () const noexcept = 0;
 

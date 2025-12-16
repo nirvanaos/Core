@@ -78,6 +78,7 @@ void ClassLibrary::terminate () noexcept
 		}
 	}
 	sync_context_type_ = SyncContext::Type::FREE_MODULE_TERM;
+	at_exit_.execute ();
 	Module::terminate ();
 	sync_context_type_ = SyncContext::Type::FREE;
 }
@@ -108,11 +109,6 @@ void ClassLibrary::atexit (AtExitFunc f)
 			initterm_mem_context_ = &MemContext::current ();
 	}
 	at_exit_.atexit (initterm_mem_context_->heap (), f);
-}
-
-void ClassLibrary::execute_atexit () noexcept
-{
-	at_exit_.execute ();
 }
 
 }

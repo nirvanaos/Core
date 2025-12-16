@@ -56,7 +56,6 @@ public:
 	}
 
 	virtual void atexit (AtExitFunc f) override;
-	virtual void execute_atexit () noexcept override;
 
 	virtual void initialize () override;
 	virtual void terminate () noexcept override;

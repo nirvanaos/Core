@@ -45,6 +45,7 @@ namespace Core {
 
 void initialize0 () noexcept
 {
+	Heap::initialize ();
 	Chrono::initialize ();
 	g_core_free_sync_context.construct ();
 	CoreModule::initialize ();
@@ -52,7 +53,7 @@ void initialize0 () noexcept
 	ThreadBackground::initialize ();
 	ExecDomain::initialize ();
 	Scheduler::initialize ();
-	Heap::initialize ();
+  SystemInfo::initialize ();
 }
 
 void initialize ()
@@ -116,7 +117,6 @@ void terminate1 () noexcept
 
 void terminate0 () noexcept
 {
-	Heap::terminate ();
 	Scheduler::terminate ();
 	ExecDomain::terminate ();
 	ThreadBackground::terminate ();
@@ -125,6 +125,7 @@ void terminate0 () noexcept
 	g_core_free_sync_context.destruct ();
 #endif
 	Chrono::terminate ();
+	Heap::terminate ();
 }
 
 }

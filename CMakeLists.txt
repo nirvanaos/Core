@@ -99,7 +99,6 @@ set (proxy_idl
 nirvana_compile_idl (Nirvana IDL_FILES ${proxy_idl} OPTIONS -proxy -DCCM_LW -DCCM_NOEVENT IDL_ROOT "${NIRVANA_SDK_DIR}/include")
 nirvana_compile_idl (Nirvana IDL_FILES ${core_idl} OPTIONS -proxy OUT_H ${core_idl_h_dir})
 target_link_libraries (Nirvana PRIVATE Core Port)
-target_link_options (Nirvana PRIVATE "LINKER:/entry:nirvana_startup")
 target_include_directories (Nirvana PRIVATE Source/ORB)
 
 # Core modules
